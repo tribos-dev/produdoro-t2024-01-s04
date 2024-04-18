@@ -54,5 +54,10 @@ public class TarefaInfraRepository implements TarefaRepository {
         log.info("[finaliza] TarefaInfraRepository - buscaTarefaPorId");
 		return listaDeTarefas;
 	}
+	@Override
+	public void deletaTodasAsTarefasDoUsuario(List<Tarefa> tarefasDoUsuario) {
+        log.info("[inicia] TarefaInfraRepository - deletaTodasAsTarefasDoUsuario");
+        log.info("[finaliza] TarefaInfraRepository - deletaTodasAsTarefasDoUsuario");
+	}
 	
 }

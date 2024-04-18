@@ -51,6 +51,7 @@ public class TarefaApplicationService implements TarefaService {
         Usuario usuario = usuarioRepository.buscaUsuarioPorId(idUsuario);
         usuario.pertenceAoUsuario(usuarioPorEmail);
         List<Tarefa> tarefasDoUsuario = tarefaRepository.buscaTodasAsTarefasDoUsuario(usuario.getIdUsuario());
+        tarefaRepository.deletaTodasAsTarefasDoUsuario(tarefasDoUsuario);
         log.info("[finaliza] TarefaApplicationService - deletaTodasAsTarefasDoUsuario");
 	}
 	
