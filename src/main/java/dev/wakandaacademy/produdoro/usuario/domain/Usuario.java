@@ -46,7 +46,7 @@ public class Usuario {
 
 	public void pertenceAoUsuario(Usuario usuarioPorEmail) {
 		if(!this.idUsuario.equals(usuarioPorEmail.getIdUsuario())) {
-			APIException.build(HttpStatus.UNAUTHORIZED, "Usúario(a) não autorizado(a) para a requisição solicitada");
+			throw APIException.build(HttpStatus.UNAUTHORIZED, "Usúario(a) não autorizado(a) para a requisição solicitada");
 		}
 	}
 }
