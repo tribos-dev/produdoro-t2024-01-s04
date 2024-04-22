@@ -18,8 +18,4 @@ public interface TarefaAPI {
     @ResponseStatus(code = HttpStatus.OK)
     TarefaDetalhadoResponse detalhaTarefa(@RequestHeader(name = "Authorization",required = true) String token, 
     		@PathVariable UUID idTarefa);
-
-    @PatchMapping(value = "/{idUsuario}/pausaLonga")
-    @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    void mudaStatusPausaLonga(@RequestHeader(name = "Authorization", required = true) String token, @PathVariable UUID idUsuario);
 }

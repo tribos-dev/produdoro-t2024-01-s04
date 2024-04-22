@@ -41,10 +41,4 @@ public class TarefaRestController implements TarefaAPI {
 		log.info("[usuario] {}", usuario);
 		return usuario;
 	}
-
-	@Override
-	public void mudaStatusPausaLonga(String token, UUID idUsuario) {
-		log.info("[inicia] TarefaRestController - mudaStatusPausaLonga");
-		log.info("[finaliza] TarefaRestController - mudaStatusPausaLonga");
-	}
 }
