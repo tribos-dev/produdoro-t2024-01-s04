@@ -51,7 +51,7 @@ public class Usuario {
 
     private StatusUsuario mudaStatusFoco() {
         if(this.status.equals(StatusUsuario.FOCO)) {
-            throw APIException.build(HttpStatus.CONFLICT, "Status do usuário já está em foco");
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário já esta em FOCO!");
         }
         return this.status = StatusUsuario.FOCO;
     }
