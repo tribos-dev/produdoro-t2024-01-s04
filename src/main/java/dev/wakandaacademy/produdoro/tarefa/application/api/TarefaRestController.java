@@ -42,4 +42,9 @@ public class TarefaRestController implements TarefaAPI {
 		return usuario;
 	}
 
+	@Override
+	public void definiTarefaComoAtiva(String token, UUID idTarefa) {
+		log.info("[inicia] TarefaRestController - definiTarefaComoAtiva");
+		log.info("[finaliza] TarefaRestController - definiTarefaComoAtiva");
+	}
 }
