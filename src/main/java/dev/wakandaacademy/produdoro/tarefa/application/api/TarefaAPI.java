@@ -28,7 +28,7 @@ public interface TarefaAPI {
     		@PathVariable UUID idTarefa);
 
     @DeleteMapping("/usuario/{idUsuario}/deleta-tarefas-concluidas")
-    @ResponseStatus(code = HttpStatus.OK)
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
     void deletaTarefasConcluidas(@RequestHeader(name = "Authorization",required = true) String token, 
     		@PathVariable UUID idUsuario);
 
