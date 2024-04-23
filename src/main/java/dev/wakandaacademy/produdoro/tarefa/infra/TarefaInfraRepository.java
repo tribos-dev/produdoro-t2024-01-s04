@@ -1,6 +1,7 @@
 package dev.wakandaacademy.produdoro.tarefa.infra;
 
 import dev.wakandaacademy.produdoro.handler.APIException;
+import dev.wakandaacademy.produdoro.tarefa.application.api.NovaPosicaoDaTarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,5 +46,12 @@ public class TarefaInfraRepository implements TarefaRepository {
         int contarTarefas = tarefaSpringMongoDBRepository.countByIdUsuario(idUsuario);
         log.info("[finaliza] TarefaInfraRepository - contarTarefasDoUsuario");
         return contarTarefas;
+    }
+
+    @Override
+    public void defineNovaPosicaoDatarefa(Tarefa tarefa, List<Tarefa> tarefas, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefaRequest) {
+        log.info("[inicia] TarefaInfraRepository - defineNovaPosicaoDatarefa");
+        
+        log.info("[finaliza] TarefaInfraRepository - defineNovaPosicaoDatarefa");
     }
 }

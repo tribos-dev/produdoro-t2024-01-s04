@@ -13,6 +13,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -45,6 +46,10 @@ public class TarefaApplicationService implements TarefaService {
 
     @Override
     public void mudaOrdemDatarefa(String emailDoUsuario, UUID idTarefa, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefaRequest) {
-
+        log.info("[inicia] TarefaApplicationService - mudaOrdemDatarefa");
+        Tarefa tarefa = detalhaTarefa(emailDoUsuario,idTarefa);
+        List<Tarefa> tarefas = tarefaRepository.buscaTodasTarefasDoUsuario(tarefa.getIdUsuario());
+        tarefaRepository.defineNovaPosicaoDatarefa(tarefa,tarefas,novaPosicaoDaTarefaRequest);
+        log.info("[finaliza] TarefaApplicationService - mudaOrdemDatarefa");
     }
 }
