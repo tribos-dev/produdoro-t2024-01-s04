@@ -40,7 +40,7 @@ public class Tarefa {
 	private int contagemPomodoro;
 	private Integer posicao;
 
-	public Tarefa(TarefaRequest tarefaRequest) {
+	public Tarefa(TarefaRequest tarefaRequest, int novaPosicao) {
 		this.idTarefa = UUID.randomUUID();
 		this.idUsuario = tarefaRequest.getIdUsuario();
 		this.descricao = tarefaRequest.getDescricao();
@@ -48,7 +48,7 @@ public class Tarefa {
 		this.idProjeto = tarefaRequest.getIdProjeto();
 		this.status = StatusTarefa.A_FAZER;
 		this.statusAtivacao = StatusAtivacaoTarefa.INATIVA;
-		this.posicao = 0;
+		this.posicao = novaPosicao;
 		this.contagemPomodoro = 1;
 	}
 
