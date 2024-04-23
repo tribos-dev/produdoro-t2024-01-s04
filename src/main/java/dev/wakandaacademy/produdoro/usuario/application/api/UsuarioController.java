@@ -38,12 +38,12 @@ public class UsuarioController implements UsuarioAPI {
 		return buscaUsuario;
 	}
 	@Override
-	public void mudarStatusPausaCurta(UUID idUsuario, String token) {
-		log.info("[inicia] UsuarioController - mudarStatusPausaCurta");
+	public void mudarStatusParaPausaCurta(UUID idUsuario, String token) {
+		log.info("[inicia] UsuarioController - mudarStatusParaPausaCurta");
 		log.info("[idUsuario] {}", idUsuario);		
 		String usuarioEmail = tokenService.getUsuarioByBearerToken(token)
 				.orElseThrow(() -> APIException.build(HttpStatus.UNAUTHORIZED, token));
-		usuarioAppplicationService.mudarStatusPausaCurta(idUsuario,usuarioEmail);
-		log.info("[finaliza] UsuarioController - mudarStatusPausaCurta");		
+		usuarioAppplicationService.mudarStatusParaPausaCurta(idUsuario,usuarioEmail);
+		log.info("[finaliza] UsuarioController - mudarStatusParaPausaCurta");		
 	}
 }
