@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
-import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
 
 public interface TarefaRepository {
 
@@ -13,5 +12,6 @@ public interface TarefaRepository {
     Optional<Tarefa> buscaTarefaPorId(UUID idTarefa);
 	int tamanhoDaLista(UUID idUsuario);
 	List<Tarefa> buscaTarefasDoUsuario(UUID idUsuario);
+	List<Tarefa> buscaTarefasConcluidas(UUID idUsuario);
 
 }

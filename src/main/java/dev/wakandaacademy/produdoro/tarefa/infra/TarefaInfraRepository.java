@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
+import dev.wakandaacademy.produdoro.tarefa.domain.StatusTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -23,46 +24,58 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor
 public class TarefaInfraRepository implements TarefaRepository {
 
-    private final TarefaSpringMongoDBRepository tarefaSpringMongoDBRepository;
-    private final MongoTemplate mongoTemplate;
-    
-    @Override
-    public Tarefa salva(Tarefa tarefa) {
-        log.info("[inicia] TarefaInfraRepository - salva");
-        try {
-            tarefaSpringMongoDBRepository.save(tarefa);
-        } catch (DataIntegrityViolationException e) {
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Tarefa já cadastrada", e);
-        }
-        log.info("[finaliza] TarefaInfraRepository - salva");
-        return tarefa;
-    }
-    @Override
-    public Optional<Tarefa> buscaTarefaPorId(UUID idTarefa) {
-        log.info("[inicia] TarefaInfraRepository - buscaTarefaPorId");
-        Optional<Tarefa> tarefaPorId = tarefaSpringMongoDBRepository.findByIdTarefa(idTarefa);
-        log.info("[finaliza] TarefaInfraRepository - buscaTarefaPorId");
-        return tarefaPorId;
-    }
-    
+	private final TarefaSpringMongoDBRepository tarefaSpringMongoDBRepository;
+	private final MongoTemplate mongoTemplate;
+
+	@Override
+	public Tarefa salva(Tarefa tarefa) {
+		log.info("[inicia] TarefaInfraRepository - salva");
+		try {
+			tarefaSpringMongoDBRepository.save(tarefa);
+		} catch (DataIntegrityViolationException e) {
+			throw APIException.build(HttpStatus.BAD_REQUEST, "Tarefa já cadastrada", e);
+		}
+		log.info("[finaliza] TarefaInfraRepository - salva");
+		return tarefa;
+	}
+
+	@Override
+	public Optional<Tarefa> buscaTarefaPorId(UUID idTarefa) {
+		log.info("[inicia] TarefaInfraRepository - buscaTarefaPorId");
+		Optional<Tarefa> tarefaPorId = tarefaSpringMongoDBRepository.findByIdTarefa(idTarefa);
+		log.info("[finaliza] TarefaInfraRepository - buscaTarefaPorId");
+		return tarefaPorId;
+	}
+
 	@Override
 	public int tamanhoDaLista(UUID idUsuario) {
-        log.info("[inicia] TarefaInfraRepository - tamanhoDaLista");
-        List<Tarefa> tarefasDoUsuario = buscaTarefasDoUsuario(idUsuario);
-        int tamanhoDaLista = tarefasDoUsuario.size();
-        log.info("[finaliza] TarefaInfraRepository - tamanhoDaLista");
+		log.info("[inicia] TarefaInfraRepository - tamanhoDaLista");
+		List<Tarefa> tarefasDoUsuario = buscaTarefasDoUsuario(idUsuario);
+		int tamanhoDaLista = tarefasDoUsuario.size();
+		log.info("[finaliza] TarefaInfraRepository - tamanhoDaLista");
 		return tamanhoDaLista;
 	}
-	
+
 	@Override
 	public List<Tarefa> buscaTarefasDoUsuario(UUID idUsuario) {
-        log.info("[inicia] TarefaInfraRepository - buscaTarefasDoUsuario");
-        Query query = new Query();
-        query.addCriteria(Criteria.where("idUsuario").is(idUsuario));
-        query.with(Sort.by(Sort.Direction.ASC, "posicao"));
-        List<Tarefa> tarefasDoUsuario = mongoTemplate.find(query, Tarefa.class);
-        log.info("[finaliza] TarefaInfraRepository - buscaTarefasDoUsuario");
+		log.info("[inicia] TarefaInfraRepository - buscaTarefasDoUsuario");
+		Query query = new Query();
+		query.addCriteria(Criteria.where("idUsuario").is(idUsuario));
+		query.with(Sort.by(Sort.Direction.ASC, "posicao"));
+		List<Tarefa> tarefasDoUsuario = mongoTemplate.find(query, Tarefa.class);
+		log.info("[finaliza] TarefaInfraRepository - buscaTarefasDoUsuario");
 		return tarefasDoUsuario;
 	}
-	
+
+	@Override
+	public List<Tarefa> buscaTarefasConcluidas(UUID idUsuario) {
+		log.info("[inicia] TarefaInfraRepository - buscaTarefasConcluidas");
+		Query query = new Query();
+		query.addCriteria(Criteria.where("idUsuario").is(idUsuario)
+				.and("status").is(StatusTarefa.CONCLUIDA));
+		List<Tarefa> tarefasConcluidas = mongoTemplate.find(query, Tarefa.class);
+		log.info("[finaliza] TarefaInfraRepository - buscaTarefasConclidas");
+		return tarefasConcluidas;
+	}
+
 }
