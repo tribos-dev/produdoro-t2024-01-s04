@@ -51,7 +51,11 @@ public class TarefaApplicationService implements TarefaService {
         log.info("[usuarioPorEmail] {}", usuarioPorEmail);
         Usuario usuario = usuarioRepository.buscaUsuarioPorId(idUsuario);
         usuario.pertenceAoUsuario(usuarioPorEmail);
-        List<Tarefa> buscaTarefasConclidas = tarefaRepository.buscaTarefasConcluidas(usuario.getIdUsuario());
+        List<Tarefa> tarefasConcluidas = tarefaRepository.buscaTarefasConcluidas(usuario.getIdUsuario());
+		if(tarefasConcluidas.isEmpty()) {
+			throw APIException.build(HttpStatus.BAD_REQUEST, "Usúario não possui nenhuma tarefa cadastrada!");
+		}
+		tarefaRepository.deletaVariasTarefas(tarefasConcluidas);
         log.info("[finaliza] TarefaApplicationService - detalhaTarefa");
 	}
 	

@@ -13,5 +13,6 @@ public interface TarefaRepository {
 	int tamanhoDaLista(UUID idUsuario);
 	List<Tarefa> buscaTarefasDoUsuario(UUID idUsuario);
 	List<Tarefa> buscaTarefasConcluidas(UUID idUsuario);
+	void deletaVariasTarefas(List<Tarefa> tarefasConcluidas);
 
 }
