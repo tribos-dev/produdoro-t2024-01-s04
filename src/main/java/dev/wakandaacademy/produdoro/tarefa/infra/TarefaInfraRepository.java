@@ -1,16 +1,22 @@
 package dev.wakandaacademy.produdoro.tarefa.infra;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Repository;
+
 import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 @Log4j2
@@ -18,7 +24,8 @@ import java.util.UUID;
 public class TarefaInfraRepository implements TarefaRepository {
 
     private final TarefaSpringMongoDBRepository tarefaSpringMongoDBRepository;
-
+    private final MongoTemplate mongoTemplate;
+    
     @Override
     public Tarefa salva(Tarefa tarefa) {
         log.info("[inicia] TarefaInfraRepository - salva");
@@ -37,4 +44,25 @@ public class TarefaInfraRepository implements TarefaRepository {
         log.info("[finaliza] TarefaInfraRepository - buscaTarefaPorId");
         return tarefaPorId;
     }
+    
+	@Override
+	public int tamanhoDaLista(UUID idUsuario) {
+        log.info("[inicia] TarefaInfraRepository - tamanhoDaLista");
+        List<Tarefa> tarefasDoUsuario = buscaTarefasDoUsuario(idUsuario);
+        int tamanhoDaLista = tarefasDoUsuario.size();
+        log.info("[finaliza] TarefaInfraRepository - tamanhoDaLista");
+		return tamanhoDaLista;
+	}
+	
+	@Override
+	public List<Tarefa> buscaTarefasDoUsuario(UUID idUsuario) {
+        log.info("[inicia] TarefaInfraRepository - buscaTarefasDoUsuario");
+        Query query = new Query();
+        query.addCriteria(Criteria.where("idUsuario").is(idUsuario));
+        query.with(Sort.by(Sort.Direction.ASC, "posicao"));
+        List<Tarefa> tarefasDoUsuario = mongoTemplate.find(query, Tarefa.class);
+        log.info("[finaliza] TarefaInfraRepository - buscaTarefasDoUsuario");
+		return tarefasDoUsuario;
+	}
+	
 }
