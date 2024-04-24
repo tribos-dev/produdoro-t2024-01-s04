@@ -2,6 +2,7 @@ package dev.wakandaacademy.produdoro.tarefa.application.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,8 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 import dev.wakandaacademy.produdoro.DataHelper;
+import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaIdResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
@@ -71,6 +74,19 @@ class TarefaApplicationServiceTest {
     	
     	verify(tarefaRepository, times(1)).deletaVariasTarefas(tarefasConcluidas);
     	verify(tarefaRepository, times(1)).atualizaPosicaoDasTarefas(tarefas);
-
     }
+    
+    @Test
+    @DisplayName("Deleta tarefas concluidas quando email for inexistente")
+    void deletaTarefasConcluidas_comEmailInexistente_retornaAPIException(){
+    	String email = "emailinvalido@gmail.com";
+    	when(usuarioRepository.buscaUsuarioPorEmail(any()))
+    	.thenThrow(APIException.build(HttpStatus.BAD_REQUEST, "Usuario não encontrado!"));
+    	
+    	assertThrows(APIException.class,
+    				() -> tarefaApplicationService.deletaTarefasConcluidas(email, UUID.randomUUID()));
+    	
+    	verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(email);
+    }
+    
 }
