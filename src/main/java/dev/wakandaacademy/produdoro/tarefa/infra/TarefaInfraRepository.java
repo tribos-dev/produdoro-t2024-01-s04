@@ -7,7 +7,6 @@ import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -61,7 +60,7 @@ public class TarefaInfraRepository implements TarefaRepository {
         log.info("[inicia] TarefaInfraRepository - defineNovaPosicaoDatarefa");
         validaNovaPosicao(tarefa,tarefas,novaPosicaoDaTarefa);
         int posicaoAntiga = tarefa.getPosicao();
-        int novaPosicao = novaPosicaoDaTarefa.getPosicao();
+        int novaPosicao = novaPosicaoDaTarefa.getNovaPosicao();
         List<Tarefa> tarefasComPosicaoAtualizada = IntStream
                 .range(Math.min(novaPosicao, posicaoAntiga), Math.max(novaPosicao, posicaoAntiga))
                 .mapToObj(i -> atualizaPosicaoTarefas(tarefas.get(i), novaPosicao < posicaoAntiga, tarefas))
@@ -73,12 +72,21 @@ public class TarefaInfraRepository implements TarefaRepository {
         log.info("[finaliza] TarefaInfraRepository - defineNovaPosicaoDatarefa");
     }
 
+    @Override
+    public List<Tarefa> buscaTodasAsTarefasDoUsuario(UUID idUsuario) {
+        log.info("[inicia] TarefaInfraRepository - buscaTodasTarefasDoUsuario");
+        List<Tarefa> Tarefas = tarefaSpringMongoDBRepository.findAllByIdUsuarioOrderByPosicao(idUsuario);
+        log.info("[finaliza] TarefaInfraRepository - buscaTodasTarefasDoUsuario");
+        return Tarefas;
+    }
+
+    @Override
     public void salvaVariasTarefas(List<Tarefa> tarefasComPosicaoAtualizada) {
         log.info("[inicia] TarefaInfraRepository - salvaVariasTarefas");
         tarefaSpringMongoDBRepository.saveAll(tarefasComPosicaoAtualizada);
         log.info("[finaliza] TarefaInfraRepository - salvaVariasTarefas");
     }
-    
+
 
     private Tarefa atualizaPosicaoTarefas(Tarefa tarefa, Boolean incrementa, List<Tarefa> tarefas) {
         if (incrementa)
@@ -96,8 +104,8 @@ public class TarefaInfraRepository implements TarefaRepository {
         int posicaoAntiga = tarefa.getPosicao();
         int tamanhoDalistaDeTarefas = tarefas.size();
 
-        if (novaPosicaoDaTarefa.getPosicao() >= tamanhoDalistaDeTarefas || novaPosicaoDaTarefa.getPosicao().equals(posicaoAntiga)) {
-            String mensagem = novaPosicaoDaTarefa.getPosicao() >= tamanhoDalistaDeTarefas
+        if (novaPosicaoDaTarefa.getNovaPosicao() >= tamanhoDalistaDeTarefas || novaPosicaoDaTarefa.getNovaPosicao().equals(posicaoAntiga)) {
+            String mensagem = novaPosicaoDaTarefa.getNovaPosicao() >= tamanhoDalistaDeTarefas
                     ?"A posição da tarefa não pode ser maior, nem igual a quantidade de tarefas do usuario"
                     :"A posição enviada é igual a posição atual da tarefa, insira uma nova posição";
             throw APIException.build(HttpStatus.BAD_REQUEST, mensagem);

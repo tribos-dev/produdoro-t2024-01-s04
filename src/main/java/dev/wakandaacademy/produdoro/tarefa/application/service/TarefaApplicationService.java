@@ -48,7 +48,7 @@ public class TarefaApplicationService implements TarefaService {
     public void mudaOrdemDatarefa(String emailDoUsuario, UUID idTarefa, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefaRequest) {
         log.info("[inicia] TarefaApplicationService - mudaOrdemDatarefa");
         Tarefa tarefa = detalhaTarefa(emailDoUsuario,idTarefa);
-        List<Tarefa> tarefas = tarefaRepository.buscaTodasTarefasDoUsuario(tarefa.getIdUsuario());
+        List<Tarefa> tarefas = tarefaRepository.buscaTodasAsTarefasDoUsuario(tarefa.getIdUsuario());
         tarefaRepository.defineNovaPosicaoDatarefa(tarefa,tarefas,novaPosicaoDaTarefaRequest);
         log.info("[finaliza] TarefaApplicationService - mudaOrdemDatarefa");
     }
