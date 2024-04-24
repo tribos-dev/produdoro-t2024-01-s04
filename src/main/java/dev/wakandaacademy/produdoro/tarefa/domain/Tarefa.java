@@ -50,8 +50,20 @@ public class Tarefa {
 	}
 
 	public void pertenceAoUsuario(Usuario usuarioPorEmail) {
-		if(!this.idUsuario.equals(usuarioPorEmail.getIdUsuario())) {
+		if (!this.idUsuario.equals(usuarioPorEmail.getIdUsuario())) {
 			throw APIException.build(HttpStatus.UNAUTHORIZED, "Usuário não é dono da Tarefa solicitada!");
+		}
+	}
+
+	public void incrementaPosicao(int tamanhoLista) {
+		if (this.posicao < tamanhoLista - 1) {
+			this.posicao++;
+		}
+	}
+
+	public void decrementaPosicao() {
+		if (this.posicao > 0) {
+			this.posicao--;
 		}
 	}
 }

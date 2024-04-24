@@ -7,12 +7,19 @@ import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Repository
 @Log4j2
@@ -20,6 +27,7 @@ import java.util.UUID;
 public class TarefaInfraRepository implements TarefaRepository {
 
     private final TarefaSpringMongoDBRepository tarefaSpringMongoDBRepository;
+    private final MongoTemplate mongoTemplate;
 
     @Override
     public Tarefa salva(Tarefa tarefa) {
@@ -49,9 +57,50 @@ public class TarefaInfraRepository implements TarefaRepository {
     }
 
     @Override
-    public void defineNovaPosicaoDatarefa(Tarefa tarefa, List<Tarefa> tarefas, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefaRequest) {
+    public void defineNovaPosicaoDatarefa(Tarefa tarefa, List<Tarefa> tarefas, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefa) {
         log.info("[inicia] TarefaInfraRepository - defineNovaPosicaoDatarefa");
-        
+        validaNovaPosicao(tarefa,tarefas,novaPosicaoDaTarefa);
+        int posicaoAntiga = tarefa.getPosicao();
+        int novaPosicao = novaPosicaoDaTarefa.getPosicao();
+        List<Tarefa> tarefasComPosicaoAtualizada = IntStream
+                .range(Math.min(novaPosicao, posicaoAntiga), Math.max(novaPosicao, posicaoAntiga))
+                .mapToObj(i -> atualizaPosicaoTarefas(tarefas.get(i), novaPosicao < posicaoAntiga, tarefas))
+                .collect(Collectors.toList());
+        atualizaPosicaoTarefas(tarefa, novaPosicao > posicaoAntiga, tarefas);
+        tarefa.setPosicao(novaPosicao);
+        salva(tarefa);
+        salvaVariasTarefas(tarefasComPosicaoAtualizada);
         log.info("[finaliza] TarefaInfraRepository - defineNovaPosicaoDatarefa");
+    }
+
+    public void salvaVariasTarefas(List<Tarefa> tarefasComPosicaoAtualizada) {
+        log.info("[inicia] TarefaInfraRepository - salvaVariasTarefas");
+        tarefaSpringMongoDBRepository.saveAll(tarefasComPosicaoAtualizada);
+        log.info("[finaliza] TarefaInfraRepository - salvaVariasTarefas");
+    }
+    
+
+    private Tarefa atualizaPosicaoTarefas(Tarefa tarefa, Boolean incrementa, List<Tarefa> tarefas) {
+        if (incrementa)
+            tarefa.incrementaPosicao(tarefas.size());
+        else
+            tarefa.decrementaPosicao();
+        Query queryAtualizacao = new Query(Criteria.where("idTarefa").is(tarefa.getIdTarefa()));
+        Update updateAtualizacao = new Update().set("posicao", tarefa.getPosicao());
+        mongoTemplate.updateFirst(queryAtualizacao, updateAtualizacao, Tarefa.class);
+        return tarefa;
+    }
+
+
+    private void validaNovaPosicao(Tarefa tarefa, List<Tarefa> tarefas, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefa) {
+        int posicaoAntiga = tarefa.getPosicao();
+        int tamanhoDalistaDeTarefas = tarefas.size();
+
+        if (novaPosicaoDaTarefa.getPosicao() >= tamanhoDalistaDeTarefas || novaPosicaoDaTarefa.getPosicao().equals(posicaoAntiga)) {
+            String mensagem = novaPosicaoDaTarefa.getPosicao() >= tamanhoDalistaDeTarefas
+                    ?"A posição da tarefa não pode ser maior, nem igual a quantidade de tarefas do usuario"
+                    :"A posição enviada é igual a posição atual da tarefa, insira uma nova posição";
+            throw APIException.build(HttpStatus.BAD_REQUEST, mensagem);
+        }
     }
 }
