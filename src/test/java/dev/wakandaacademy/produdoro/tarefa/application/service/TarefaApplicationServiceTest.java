@@ -87,6 +87,22 @@ class TarefaApplicationServiceTest {
     				() -> tarefaApplicationService.deletaTarefasConcluidas(email, UUID.randomUUID()));
     	
     	verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(email);
-    }
+   }
     
+    @Test
+    @DisplayName("Deleta tarefas concluidas quando idUsuario for inexistente")
+    void deletaTarefasConcluidas_comIdUsuarioInexistente_retornaAPIException(){
+    	Usuario usuario = DataHelper.createUsuario();
+    	String email = usuario.getEmail();
+    	UUID idInvalido = UUID.randomUUID();
+    	when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+    	when(usuarioRepository.buscaUsuarioPorId(any()))
+    	.thenThrow(APIException.build(HttpStatus.BAD_REQUEST, "Usuario não encontrado!"));
+    	
+    	assertThrows(APIException.class,
+    				() -> tarefaApplicationService.deletaTarefasConcluidas(email, idInvalido));
+    	
+    	verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(email);
+    	verify(usuarioRepository, times(1)).buscaUsuarioPorId(idInvalido);
+    }
 }
