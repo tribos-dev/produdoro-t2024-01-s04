@@ -50,12 +50,12 @@ public class TarefaInfraRepository implements TarefaRepository {
 	}
 
 	@Override
-	public int tamanhoDaLista(UUID idUsuario) {
-		log.info("[inicia] TarefaInfraRepository - tamanhoDaLista");
+	public int contarTarefas(UUID idUsuario) {
+		log.info("[inicia] TarefaInfraRepository - contarTarefas");
 		List<Tarefa> tarefasDoUsuario = buscaTarefasDoUsuario(idUsuario);
-		int tamanhoDaLista = tarefasDoUsuario.size();
-		log.info("[finaliza] TarefaInfraRepository - tamanhoDaLista");
-		return tamanhoDaLista;
+		int novaPosicao = tarefasDoUsuario.size();
+		log.info("[finaliza] TarefaInfraRepository - contarTarefas");
+		return novaPosicao;
 	}
 
 	@Override
