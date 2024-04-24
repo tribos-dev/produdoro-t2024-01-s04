@@ -1,6 +1,8 @@
 package dev.wakandaacademy.produdoro.tarefa.application.api;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import dev.wakandaacademy.produdoro.tarefa.domain.StatusAtivacaoTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.StatusTarefa;
@@ -28,5 +30,11 @@ public class TarefaListResponse {
         this.statusAtivacao = tarefa.getStatusAtivacao();
         this.contagemPomodoro = tarefa.getContagemPomodoro();
     }
+
+	public static List<TarefaListResponse> converter(List<Tarefa> tarefas) {
+		return tarefas.stream()
+				.map(TarefaListResponse::new)
+				.collect(Collectors.toList());
+	}
 
 }
