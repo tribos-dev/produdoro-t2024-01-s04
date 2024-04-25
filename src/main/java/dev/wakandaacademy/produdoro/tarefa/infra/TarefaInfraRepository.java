@@ -3,6 +3,7 @@ package dev.wakandaacademy.produdoro.tarefa.infra;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -90,9 +91,11 @@ public class TarefaInfraRepository implements TarefaRepository {
 	@Override
 	public void atualizaPosicaoDasTarefas(List<Tarefa> tarefasDoUsuario) {
 		log.info("[inicia] TarefaInfraRepository - atualizaPosicaoDasTarefas");
-		int tamanhaDalista = tarefasDoUsuario.size();
-		IntStream.range(0, tamanhaDalista)
-			.mapToObj(i -> atualizaTarefaComNovaPosicao(tarefasDoUsuario.get(i), i));
+		int tamanhoDaLista = tarefasDoUsuario.size();
+		List<Tarefa> posicoesAtualizadas = IntStream.range(0, tamanhoDaLista)
+				.mapToObj(i -> atualizaTarefaComNovaPosicao(tarefasDoUsuario.get(i), i))
+				.collect(Collectors.toList());
+		salvaVariasTarefas(posicoesAtualizadas);
 		log.info("[finaliza] TarefaInfraRepository - atualizaPosicaoDasTarefas");
 	}
 	
