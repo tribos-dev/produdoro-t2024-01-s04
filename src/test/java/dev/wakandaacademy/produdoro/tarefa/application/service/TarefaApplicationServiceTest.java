@@ -100,4 +100,21 @@ class TarefaApplicationServiceTest {
     	verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(any());
     	verify(usuarioRepository, times(1)).buscaUsuarioPorId(any());
     }
+	
+	@Test
+    @DisplayName("Deleta todas as tarefas do usuario quando usuarioEmail nao pertence ao usuario")
+    void deletaTodasAsTarefasDoUsuario_comUsuarioEmailNaoPertenceAoUsuario_retornaAPIException() {
+		Usuario usuario = DataHelper.createUsuario();
+		Usuario usuarioTeste = DataHelper.createUsuarioTeste();
+		String email = usuarioTeste.getEmail();
+		UUID idUusario = usuario.getIdUsuario();
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuarioTeste);
+		when(usuarioRepository.buscaUsuarioPorId(any())).thenReturn(usuario);
+
+		APIException ex = assertThrows(APIException.class, 
+    			() -> tarefaApplicationService.deletaTodasAsTarefasDoUsuario(email, idUusario));
+    	
+    	assertEquals("Usúario(a) não autorizado(a) para a requisição solicitada", ex.getMessage());
+    	assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusException());
+    }
 }
