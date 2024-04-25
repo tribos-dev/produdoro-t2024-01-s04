@@ -55,4 +55,17 @@ public class Tarefa {
 			throw APIException.build(HttpStatus.UNAUTHORIZED, "Usuário não é dono da Tarefa solicitada!");
 		}
 	}
+
+    public void verificaStatusFoco(Usuario usuario) {
+        String focus = String.valueOf(usuario.getStatus());
+        if (!focus.equals("FOCO")) {
+            throw APIException.build(HttpStatus.BAD_REQUEST, "Status diferente de FOCO, não é possível incrementar pomodoro");
+        }
+        incrementaPomodoro();
+    }
+
+    public void incrementaPomodoro() {
+        this.contagemPomodoro++;
+    }
+
 }
