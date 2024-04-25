@@ -110,4 +110,11 @@ public class TarefaInfraRepository implements TarefaRepository {
 		return tarefa;
 	}
 
+	@Override
+	public void salvaVariasTarefas(List<Tarefa> tarefasDoUsuario) {
+		log.info("[inicia] TarefaInfraRepository - salvaVariasTarefas");
+		tarefaSpringMongoDBRepository.saveAll(tarefasDoUsuario);
+		log.info("[finaliza] TarefaInfraRepository - salvaVariasTarefas");
+	}
+
 }
