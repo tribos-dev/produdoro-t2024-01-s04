@@ -11,7 +11,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
@@ -92,27 +91,20 @@ public class TarefaInfraRepository implements TarefaRepository {
 	public void atualizaPosicaoDasTarefas(List<Tarefa> tarefasDoUsuario) {
 		log.info("[inicia] TarefaInfraRepository - atualizaPosicaoDasTarefas");
 		int tamanhoDaLista = tarefasDoUsuario.size();
-		List<Tarefa> posicoesAtualizadas = IntStream.range(0, tamanhoDaLista)
-				.mapToObj(i -> atualizaTarefaComNovaPosicao(tarefasDoUsuario.get(i), i))
-				.collect(Collectors.toList());
-		salvaVariasTarefas(posicoesAtualizadas);
+		List<Tarefa> tarefasAtualizadas = IntStream.range(0, tamanhoDaLista)
+			.mapToObj(i -> atualizaTarefaComNovaPosicao(tarefasDoUsuario.get(i), i))
+			.collect(Collectors.toList());
+			salvaVariasTarefas(tarefasAtualizadas);
 		log.info("[finaliza] TarefaInfraRepository - atualizaPosicaoDasTarefas");
 	}
 	
 	private Tarefa atualizaTarefaComNovaPosicao(Tarefa tarefa, int novaPosicao) {
 		log.info("[inicia] TarefaInfraRepository - atualizaPosicaoDasTarefas");
 		tarefa.atualizaPosicao(novaPosicao);
-		Query query = new Query();
-		query.addCriteria(Criteria.where("idTarefa").is(tarefa.getIdTarefa()));
-		
-		Update update = new Update();
-		update.set("posicao", tarefa.getPosicao());
-		
-		mongoTemplate.updateFirst(query, update, Tarefa.class);
 		log.info("[finaliza] TarefaInfraRepository - atualizaPosicaoDasTarefas");
 		return tarefa;
 	}
-
+	
 	@Override
 	public void salvaVariasTarefas(List<Tarefa> tarefasDoUsuario) {
 		log.info("[inicia] TarefaInfraRepository - salvaVariasTarefas");
