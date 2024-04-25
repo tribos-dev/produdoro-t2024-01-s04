@@ -136,7 +136,7 @@ class TarefaApplicationServiceTest {
 		APIException ex = assertThrows(APIException.class,
 				() -> tarefaApplicationService.deletaTarefasConcluidas(email, idUsuario));
 
-		assertEquals("Usúario não possui nenhuma tarefa cadastrada!", ex.getMessage());
+		assertEquals("Usúario não possui nenhuma tarefa concluída!", ex.getMessage());
 		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusException());
 	}
 
