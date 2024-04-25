@@ -99,9 +99,9 @@ public class TarefaInfraRepository implements TarefaRepository {
 	}
 	
 	private Tarefa atualizaTarefaComNovaPosicao(Tarefa tarefa, int novaPosicao) {
-		log.info("[inicia] TarefaInfraRepository - atualizaPosicaoDasTarefas");
+		log.info("[inicia] TarefaInfraRepository - atualizaTarefaComNovaPosicao");
 		tarefa.atualizaPosicao(novaPosicao);
-		log.info("[finaliza] TarefaInfraRepository - atualizaPosicaoDasTarefas");
+		log.info("[finaliza] TarefaInfraRepository - atualizaTarefaComNovaPosicao");
 		return tarefa;
 	}
 	
