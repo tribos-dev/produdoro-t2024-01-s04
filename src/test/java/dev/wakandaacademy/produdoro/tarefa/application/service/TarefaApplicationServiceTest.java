@@ -1,8 +1,8 @@
 package dev.wakandaacademy.produdoro.tarefa.application.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,8 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 import dev.wakandaacademy.produdoro.DataHelper;
+import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaIdResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
@@ -29,46 +31,57 @@ import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
 @ExtendWith(MockitoExtension.class)
 class TarefaApplicationServiceTest {
 
-    //	@Autowired
-    @InjectMocks
-    TarefaApplicationService tarefaApplicationService;
+	// @Autowired
+	@InjectMocks
+	TarefaApplicationService tarefaApplicationService;
 
-    //	@MockBean
-    @Mock
-    TarefaRepository tarefaRepository;
-    @Mock
-    UsuarioRepository usuarioRepository;
+	// @MockBean
+	@Mock
+	TarefaRepository tarefaRepository;
+	@Mock
+	UsuarioRepository usuarioRepository;
 
-    @Test
-    void deveRetornarIdTarefaNovaCriada() {
-        TarefaRequest request = getTarefaRequest();
-        when(tarefaRepository.salva(any())).thenReturn(new Tarefa(request));
+	@Test
+	void deveRetornarIdTarefaNovaCriada() {
+		TarefaRequest request = getTarefaRequest();
+		when(tarefaRepository.salva(any())).thenReturn(new Tarefa(request));
 
-        TarefaIdResponse response = tarefaApplicationService.criaNovaTarefa(request);
+		TarefaIdResponse response = tarefaApplicationService.criaNovaTarefa(request);
 
-        assertNotNull(response);
-        assertEquals(TarefaIdResponse.class, response.getClass());
-        assertEquals(UUID.class, response.getIdTarefa().getClass());
-    }
+		assertNotNull(response);
+		assertEquals(TarefaIdResponse.class, response.getClass());
+		assertEquals(UUID.class, response.getIdTarefa().getClass());
+	}
 
-    public TarefaRequest getTarefaRequest() {
-        TarefaRequest request = new TarefaRequest("tarefa 1", UUID.randomUUID(), null, null, 0);
-        return request;
-    }
-    
-    @Test
-    @DisplayName("Deleta todas as tarefas do usuario com sucesso")
-    void deletaTodasAsTarefasDoUsuario_comDadosValidos_sucesso() {
-    	Usuario usuario = DataHelper.createUsuario();
-    	List<Tarefa> tarefasDoUsuario = DataHelper.createListTarefa();
-    	String email = usuario.getEmail();
-    	UUID idUsuario = usuario.getIdUsuario();
-    	when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
-    	when(usuarioRepository.buscaUsuarioPorId(any())).thenReturn(usuario);
-    	when(tarefaRepository.buscaTodasAsTarefasDoUsuario(any())).thenReturn(tarefasDoUsuario);
+	public TarefaRequest getTarefaRequest() {
+		TarefaRequest request = new TarefaRequest("tarefa 1", UUID.randomUUID(), null, null, 0);
+		return request;
+	}
 
-    	tarefaApplicationService.deletaTodasAsTarefasDoUsuario(email, idUsuario);
-    	
-    	verify(tarefaRepository, times(1)).deletaTodasAsTarefasDoUsuario(tarefasDoUsuario);
+	@Test
+	@DisplayName("Deleta todas as tarefas do usuario com sucesso")
+	void deletaTodasAsTarefasDoUsuario_comDadosValidos_sucesso() {
+		Usuario usuario = DataHelper.createUsuario();
+		List<Tarefa> tarefasDoUsuario = DataHelper.createListTarefa();
+		String email = usuario.getEmail();
+		UUID idUsuario = usuario.getIdUsuario();
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+		when(usuarioRepository.buscaUsuarioPorId(any())).thenReturn(usuario);
+		when(tarefaRepository.buscaTodasAsTarefasDoUsuario(any())).thenReturn(tarefasDoUsuario);
+
+		tarefaApplicationService.deletaTodasAsTarefasDoUsuario(email, idUsuario);
+
+		verify(tarefaRepository, times(1)).deletaTodasAsTarefasDoUsuario(tarefasDoUsuario);
+	}
+
+	@Test
+    @DisplayName("Deleta todas as tarefas do usuario quando emailUsuario for inexistente")
+    void deletaTodasAsTarefasDoUsuario_comEmailInexistente_retornaAPIException() {
+    	when(usuarioRepository.buscaUsuarioPorEmail(any())).thenThrow(APIException.build(HttpStatus.BAD_REQUEST, "Usuario não encontrado!"));
+
+    	assertThrows(APIException.class, 
+    			() -> tarefaApplicationService.deletaTodasAsTarefasDoUsuario("exemplo@gmail.com", UUID.randomUUID()));
+ 
+    	verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(any());
     }
 }
