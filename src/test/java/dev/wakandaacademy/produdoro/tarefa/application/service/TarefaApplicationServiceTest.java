@@ -31,78 +31,93 @@ import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
 @ExtendWith(MockitoExtension.class)
 class TarefaApplicationServiceTest {
 
-    //	@Autowired
-    @InjectMocks
-    TarefaApplicationService tarefaApplicationService;
+	// @Autowired
+	@InjectMocks
+	TarefaApplicationService tarefaApplicationService;
 
-    //	@MockBean
-    @Mock
-    TarefaRepository tarefaRepository;
-    @Mock
-    private UsuarioRepository usuarioRepository;
+	// @MockBean
+	@Mock
+	TarefaRepository tarefaRepository;
+	@Mock
+	private UsuarioRepository usuarioRepository;
 
+	@Test
+	void deveRetornarIdTarefaNovaCriada() {
+		TarefaRequest request = getTarefaRequest();
+		when(tarefaRepository.salva(any())).thenReturn(new Tarefa(request, 0));
 
-    @Test
-    void deveRetornarIdTarefaNovaCriada() {
-        TarefaRequest request = getTarefaRequest();
-        when(tarefaRepository.salva(any())).thenReturn(new Tarefa(request, 0));
+		TarefaIdResponse response = tarefaApplicationService.criaNovaTarefa(request);
 
-        TarefaIdResponse response = tarefaApplicationService.criaNovaTarefa(request);
+		assertNotNull(response);
+		assertEquals(TarefaIdResponse.class, response.getClass());
+		assertEquals(UUID.class, response.getIdTarefa().getClass());
+	}
 
-        assertNotNull(response);
-        assertEquals(TarefaIdResponse.class, response.getClass());
-        assertEquals(UUID.class, response.getIdTarefa().getClass());
-    }
+	public TarefaRequest getTarefaRequest() {
+		TarefaRequest request = new TarefaRequest("tarefa 1", UUID.randomUUID(), null, null, 0);
+		return request;
+	}
 
-    public TarefaRequest getTarefaRequest() {
-        TarefaRequest request = new TarefaRequest("tarefa 1", UUID.randomUUID(), null, null, 0);
-        return request;
-    }
-    
-    @Test
-    @DisplayName("Deleta tarefas concluidas")
-    void deletaTarefasConcluidas_comDadosValidos_sucesso(){
-    	Usuario usuario = DataHelper.createUsuario();
-    	List<Tarefa> tarefasConcluidas = DataHelper.createTarefasConcluidas();
-    	List<Tarefa> tarefas = DataHelper.createListTarefa();
-    	when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
-    	when(usuarioRepository.buscaUsuarioPorId(any())).thenReturn(usuario);
-    	when(tarefaRepository.buscaTarefasConcluidas(any())).thenReturn(tarefasConcluidas);
-    	when(tarefaRepository.buscaTarefasDoUsuario(any())).thenReturn(tarefas);
-    	
-    	tarefaApplicationService.deletaTarefasConcluidas(usuario.getEmail(), usuario.getIdUsuario());
-    	
-    	verify(tarefaRepository, times(1)).deletaVariasTarefas(tarefasConcluidas);
-    	verify(tarefaRepository, times(1)).atualizaPosicaoDasTarefas(tarefas);
-    }
-    
-    @Test
-    @DisplayName("Deleta tarefas concluidas quando email for inexistente")
-    void deletaTarefasConcluidas_comEmailInexistente_retornaAPIException(){
-    	String email = "emailinvalido@gmail.com";
-    	when(usuarioRepository.buscaUsuarioPorEmail(any()))
-    	.thenThrow(APIException.build(HttpStatus.BAD_REQUEST, "Usuario não encontrado!"));
-    	
-    	assertThrows(APIException.class,
-    				() -> tarefaApplicationService.deletaTarefasConcluidas(email, UUID.randomUUID()));
-    	
-    	verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(email);
-   }
-    
-    @Test
-    @DisplayName("Deleta tarefas concluidas quando idUsuario for inexistente")
-    void deletaTarefasConcluidas_comIdUsuarioInexistente_retornaAPIException(){
-    	Usuario usuario = DataHelper.createUsuario();
-    	String email = usuario.getEmail();
-    	UUID idInvalido = UUID.randomUUID();
-    	when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
-    	when(usuarioRepository.buscaUsuarioPorId(any()))
-    	.thenThrow(APIException.build(HttpStatus.BAD_REQUEST, "Usuario não encontrado!"));
-    	
-    	assertThrows(APIException.class,
-    				() -> tarefaApplicationService.deletaTarefasConcluidas(email, idInvalido));
-    	
-    	verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(email);
-    	verify(usuarioRepository, times(1)).buscaUsuarioPorId(idInvalido);
-    }
+	@Test
+	@DisplayName("Deleta tarefas concluidas")
+	void deletaTarefasConcluidas_comDadosValidos_sucesso() {
+		Usuario usuario = DataHelper.createUsuario();
+		List<Tarefa> tarefasConcluidas = DataHelper.createTarefasConcluidas();
+		List<Tarefa> tarefas = DataHelper.createListTarefa();
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+		when(usuarioRepository.buscaUsuarioPorId(any())).thenReturn(usuario);
+		when(tarefaRepository.buscaTarefasConcluidas(any())).thenReturn(tarefasConcluidas);
+		when(tarefaRepository.buscaTarefasDoUsuario(any())).thenReturn(tarefas);
+
+		tarefaApplicationService.deletaTarefasConcluidas(usuario.getEmail(), usuario.getIdUsuario());
+
+		verify(tarefaRepository, times(1)).deletaVariasTarefas(tarefasConcluidas);
+		verify(tarefaRepository, times(1)).atualizaPosicaoDasTarefas(tarefas);
+	}
+
+	@Test
+	@DisplayName("Deleta tarefas concluidas quando email for inexistente")
+	void deletaTarefasConcluidas_comEmailInexistente_retornaAPIException() {
+		String email = "emailinvalido@gmail.com";
+		when(usuarioRepository.buscaUsuarioPorEmail(any()))
+				.thenThrow(APIException.build(HttpStatus.BAD_REQUEST, "Usuario não encontrado!"));
+
+		assertThrows(APIException.class,
+				() -> tarefaApplicationService.deletaTarefasConcluidas(email, UUID.randomUUID()));
+
+		verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(email);
+	}
+
+	@Test
+	@DisplayName("Deleta tarefas concluidas quando idUsuario for inexistente")
+	void deletaTarefasConcluidas_comIdUsuarioInexistente_retornaAPIException() {
+		Usuario usuario = DataHelper.createUsuario();
+		String email = usuario.getEmail();
+		UUID idInvalido = UUID.randomUUID();
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+		when(usuarioRepository.buscaUsuarioPorId(any()))
+				.thenThrow(APIException.build(HttpStatus.BAD_REQUEST, "Usuario não encontrado!"));
+
+		assertThrows(APIException.class, () -> tarefaApplicationService.deletaTarefasConcluidas(email, idInvalido));
+
+		verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(email);
+		verify(usuarioRepository, times(1)).buscaUsuarioPorId(idInvalido);
+	}
+	
+	@Test
+	@DisplayName("Deleta tarefas concluidas quando emailUsuario não pertence ao usuario")
+	void deletaTarefasConcluidas_quandoEmailUsuarioNaoPertenceAoUsuario_retornaAPIException() {
+		Usuario usuario = DataHelper.createUsuario();
+		UUID idUsuario = usuario.getIdUsuario();
+		Usuario usuarioTeste = DataHelper.createUsuarioTeste();
+		String email = usuarioTeste.getEmail();
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuarioTeste);
+		when(usuarioRepository.buscaUsuarioPorId(any())).thenReturn(usuario);
+		
+		APIException ex =  assertThrows(APIException.class, () -> tarefaApplicationService.deletaTarefasConcluidas(email, idUsuario));
+
+		assertEquals("Usúario(a) não autorizado(a) para a requisição solicitada!", ex.getMessage());
+		assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusException());
+	}
+	
 }
