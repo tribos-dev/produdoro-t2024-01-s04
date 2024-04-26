@@ -12,6 +12,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -40,4 +41,34 @@ public class TarefaApplicationService implements TarefaService {
         log.info("[finaliza] TarefaApplicationService - detalhaTarefa");
         return tarefa;
     }
+
+    @Override
+    public void definiTarefaComoAtiva(String usuario, UUID idTarefa) {
+        log.info("[inicia] TarefaApplicationService - definirTarefaComoAtiva");
+        Usuario usuarioEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
+
+        validarTarefa(idTarefa, usuarioEmail);
+
+        Optional<Tarefa> tarefaAtivaOptional = tarefaRepository.buscaTarefaAtivada();
+
+        tarefaAtivaOptional.ifPresent(tarefaAtiva -> {
+            tarefaAtiva.definirComoInativa();
+            tarefaRepository.salva(tarefaAtiva);
+        });
+
+        Tarefa novaTarefa = tarefaRepository.buscaTarefaPorId(idTarefa)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND,"Tarefa não encontrada."));
+        novaTarefa.definirComoAtiva();
+        tarefaRepository.salva(novaTarefa);
+        log.info("[finaliza] TarefaApplicationService - definirTarefaComoAtiva");
+    }
+
+    private Tarefa validarTarefa(UUID idTarefa, Usuario usuarioEmail) {
+        Tarefa tarefa = tarefaRepository.buscaTarefaPorId(idTarefa)
+                .orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Id Da Tarefa Inválido") );
+        tarefa.pertenceAoUsuario(usuarioEmail);
+        return tarefa;
+    }
+
+
 }
