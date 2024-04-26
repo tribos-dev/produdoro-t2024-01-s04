@@ -52,21 +52,10 @@ public class TarefaInfraRepository implements TarefaRepository {
 	@Override
 	public int contarTarefas(UUID idUsuario) {
 		log.info("[inicia] TarefaInfraRepository - contarTarefas");
-		List<Tarefa> tarefasDoUsuario = buscaTarefasDoUsuario(idUsuario);
+		List<Tarefa> tarefasDoUsuario = buscarTodasTarefasPorIdUsuario(idUsuario);
 		int novaPosicao = tarefasDoUsuario.size();
 		log.info("[finaliza] TarefaInfraRepository - contarTarefas");
 		return novaPosicao;
-	}
-
-	@Override
-	public List<Tarefa> buscaTarefasDoUsuario(UUID idUsuario) {
-		log.info("[inicia] TarefaInfraRepository - buscaTarefasDoUsuario");
-		Query query = new Query();
-		query.addCriteria(Criteria.where("idUsuario").is(idUsuario));
-		query.with(Sort.by(Sort.Direction.ASC, "posicao"));
-		List<Tarefa> tarefasDoUsuario = mongoTemplate.find(query, Tarefa.class);
-		log.info("[finaliza] TarefaInfraRepository - buscaTarefasDoUsuario");
-		return tarefasDoUsuario;
 	}
 
 	@Override
@@ -112,4 +101,11 @@ public class TarefaInfraRepository implements TarefaRepository {
 		log.info("[finaliza] TarefaInfraRepository - salvaVariasTarefas");
 	}
 
+	@Override
+	public List<Tarefa> buscarTodasTarefasPorIdUsuario(UUID idUsuario) {
+		log.info("[inicia] TarefaInfraRepository - buscarTodasTarefasPorIdUsuario");
+		List<Tarefa> todasTarefas = tarefaSpringMongoDBRepository.findAllByIdUsuario(idUsuario);
+		log.info("[finaliza] TarefaInfraRepository - buscarTodasTarefasPorIdUsuario");
+		return todasTarefas;
+	}
 }
