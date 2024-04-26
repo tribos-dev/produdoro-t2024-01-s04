@@ -1,5 +1,6 @@
 package dev.wakandaacademy.produdoro.tarefa.application.api;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.validation.Valid;
@@ -23,6 +24,12 @@ public interface TarefaAPI {
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     void incrementaPomodoro(@RequestHeader(name = "Authorization") String token,
                             @PathVariable UUID idTarefa);
-
-
+  
+    @GetMapping("/listar-tarefa/{idUsuario}")
+    @ResponseStatus(code = HttpStatus.OK)
+    List<TarefaListResponse> listarTodasTarefas(@RequestHeader(name = "Authorization",required = true) String token, 
+    		@PathVariable UUID idUsuario);
+  
+  
 }
+
