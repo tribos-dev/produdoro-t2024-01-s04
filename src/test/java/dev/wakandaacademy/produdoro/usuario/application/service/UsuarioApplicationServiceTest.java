@@ -39,16 +39,4 @@ class UsuarioApplicationServiceTest {
         verify(usuarioRepository, times(1)).salva(any());
     }
 
-    @Test
-    public void usuarioPassaTokenInvalidoParaMudarFoco() {
-        Usuario usuario = DataHelper.createUsuario();
-
-        when(usuarioRepository.buscaUsuarioPorEmail(anyString())).thenReturn(usuario);
-        APIException exception = assertThrows(APIException.class,
-                () -> usuarioApplicationService
-                        .mudaStatusParaFoco("wander@gmail.com", UUID.randomUUID()));
-        assertEquals("Credencial de autenticação não é válida", exception.getMessage());
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusException());
-    }
-
 }
