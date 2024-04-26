@@ -5,9 +5,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
@@ -23,7 +20,6 @@ import lombok.extern.log4j.Log4j2;
 public class TarefaInfraRepository implements TarefaRepository {
 
     private final TarefaSpringMongoDBRepository tarefaSpringMongoDBRepository;
-	private final MongoTemplate mongoTemplate;
 
     @Override
     public Tarefa salva(Tarefa tarefa) {
@@ -45,21 +41,17 @@ public class TarefaInfraRepository implements TarefaRepository {
     }
     
 	@Override
-	public List<Tarefa> buscaTodasAsTarefasDoUsuario(UUID idUsuario) {
-        log.info("[inicia] TarefaInfraRepository - buscaTarefaPorId");
-		Query query = new Query();
-		query.addCriteria(Criteria.where("idUsuario").is(idUsuario));
-		
-		List<Tarefa> listaDeTarefas = mongoTemplate.find(query, Tarefa.class);
-        log.info("[finaliza] TarefaInfraRepository - buscaTarefaPorId");
-		return listaDeTarefas;
-	}
-	
-	@Override
 	public void deletaTodasAsTarefasDoUsuario(List<Tarefa> tarefasDoUsuario) {
         log.info("[inicia] TarefaInfraRepository - deletaTodasAsTarefasDoUsuario");
         tarefaSpringMongoDBRepository.deleteAll(tarefasDoUsuario);
         log.info("[finaliza] TarefaInfraRepository - deletaTodasAsTarefasDoUsuario");
 	}
 	
+	@Override
+	public List<Tarefa> buscarTodasTarefasPorIdUsuario(UUID idUsuario) {
+		log.info("[inicia] TarefaInfraRepository - buscarTodasTarefasPorIdUsuario");
+		List<Tarefa> todasTarefas = tarefaSpringMongoDBRepository.findAllByIdUsuario(idUsuario);
+		log.info("[finaliza] TarefaInfraRepository - buscarTodasTarefasPorIdUsuario");
+		return todasTarefas;
+	}
 }
