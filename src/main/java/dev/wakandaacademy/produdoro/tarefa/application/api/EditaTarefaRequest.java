@@ -14,5 +14,7 @@ public class EditaTarefaRequest {
     @Size(message = "Campo descrição tarefa não pode estar vazio", max = 255, min = 3)
     private String descricao;
 
-
+    public EditaTarefaRequest(String descricao) {
+        this.descricao = descricao;
+    }
 }
