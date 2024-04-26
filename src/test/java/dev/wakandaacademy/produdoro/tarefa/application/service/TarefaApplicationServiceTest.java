@@ -1,6 +1,7 @@
 package dev.wakandaacademy.produdoro.tarefa.application.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -24,8 +26,10 @@ import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaIdResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
+import dev.wakandaacademy.produdoro.tarefa.domain.StatusAtivacaoTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 import dev.wakandaacademy.produdoro.usuario.application.repository.UsuarioRepository;
+import dev.wakandaacademy.produdoro.usuario.domain.StatusUsuario;
 import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
 
 @ExtendWith(MockitoExtension.class)
@@ -92,4 +96,31 @@ class TarefaApplicationServiceTest {
         TarefaRequest request = new TarefaRequest("tarefa 1", UUID.randomUUID(), null, null, 0);
         return request;
     }
+    
+    @Test
+    void deveDeletarTarefa() {
+    	Usuario usuario = DataHelper.createUsuario();
+    	Tarefa tarefa = DataHelper.createTarefa();
+    	
+    	when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+    	when(tarefaRepository.buscaTarefaPorId(any())).thenReturn(Optional.of(tarefa));
+    	tarefaApplicationService.deletaTarefa(tarefa.getIdTarefa(), usuario.getEmail());
+    	
+    	verify(tarefaRepository, times(1)).deleta(tarefa);
+    }
+    
+    @Test
+    void naoDeveDeletarTarefa() {
+    	Usuario usuario = DataHelper.createUsuario();
+    	String emailUsuario = "joao@gmail.com";
+    	UUID idTarefa = UUID.fromString("06fb5521-9d5a-861a-82fb-e67e3bedcbbb");
+    	Tarefa tarefa = DataHelper.createTarefa();
+    	
+		APIException e = assertThrows(APIException.class, () -> tarefaApplicationService
+				.deletaTarefa(tarefa.getIdTarefa(),usuario.getEmail()));
+		
+		assertNotEquals(idTarefa, tarefa.getIdTarefa());
+		assertNotEquals(emailUsuario, usuario.getEmail());
+		assertEquals(HttpStatus.NOT_FOUND, e.getStatusException());
+    }  
 }
