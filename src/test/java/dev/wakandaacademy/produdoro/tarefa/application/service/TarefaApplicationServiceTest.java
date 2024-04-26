@@ -1,8 +1,6 @@
 package dev.wakandaacademy.produdoro.tarefa.application.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -12,6 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import dev.wakandaacademy.produdoro.DataHelper;
+import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.domain.StatusAtivacaoTarefa;
 import dev.wakandaacademy.produdoro.usuario.application.repository.UsuarioRepository;
 import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
@@ -25,6 +24,7 @@ import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaIdResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
+import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
 class TarefaApplicationServiceTest {
@@ -57,7 +57,7 @@ class TarefaApplicationServiceTest {
         Usuario usuario = DataHelper.createUsuario();
         Tarefa tarefa = DataHelper.createTarefa();
         Tarefa tarefaAtiva = getTarefaAtiva(usuario);
-        UUID idTarefa = UUID.randomUUID();
+
 
         when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
         when(tarefaRepository.buscaTarefaPorId(tarefa.getIdTarefa())).thenReturn(Optional.of(tarefa));
@@ -70,7 +70,23 @@ class TarefaApplicationServiceTest {
         verify(tarefaRepository, times(1)).salva(tarefa);
     }
 
-    
+    @Test
+    void nãoDeveDefinirTarefaComoAtiva() {
+        Usuario usuario = DataHelper.createUsuario();
+        UUID idTarefaInvalido = UUID.randomUUID();
+
+        when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+        when(tarefaRepository.buscaTarefaPorId(idTarefaInvalido))
+                .thenThrow(APIException.build(HttpStatus.NOT_FOUND, "Id Da Tarefa Inválido"));
+
+        APIException e = assertThrows(APIException.class, () -> {
+            tarefaApplicationService.definiTarefaComoAtiva(String.valueOf(usuario), idTarefaInvalido);
+        });
+
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatusException());
+        verify(tarefaRepository, never()).buscaTarefaAtivada();
+        verify(tarefaRepository, never()).salva(any(Tarefa.class));
+    }
 
     private static Tarefa getTarefaAtiva(Usuario usuario) {
         return Tarefa.builder().contagemPomodoro(1).idTarefa(UUID.fromString("4c70c27a-446c-4506-b666-1067085d8d85"))
