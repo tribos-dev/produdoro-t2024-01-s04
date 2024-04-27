@@ -14,7 +14,7 @@ public class NovaPosicaoDaTarefaRequest {
     private Integer novaPosicao;
 
     @JsonCreator
-    public NovaPosicaoDaTarefaRequest(@JsonProperty("posicao") Integer novaPosicao) {
+    public NovaPosicaoDaTarefaRequest(@JsonProperty("novaPosicao") Integer novaPosicao) {
         this.novaPosicao = novaPosicao;
     }
 

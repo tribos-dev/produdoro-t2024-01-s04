@@ -3,6 +3,7 @@ package dev.wakandaacademy.produdoro.tarefa.application.service;
 import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.api.NovaPosicaoDaTarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaIdResponse;
+import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
@@ -45,11 +46,22 @@ public class TarefaApplicationService implements TarefaService {
     }
 
     @Override
-    public void mudaOrdemDatarefa(String emailDoUsuario, UUID idTarefa, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefaRequest) {
+    public void mudaOrdemDaTarefa(String emailDoUsuario, UUID idTarefa, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefaRequest) {
         log.info("[inicia] TarefaApplicationService - mudaOrdemDatarefa");
         Tarefa tarefa = detalhaTarefa(emailDoUsuario,idTarefa);
-        List<Tarefa> tarefas = tarefaRepository.buscaTodasAsTarefasDoUsuario(tarefa.getIdUsuario());
-        tarefaRepository.defineNovaPosicaoDatarefa(tarefa,tarefas,novaPosicaoDaTarefaRequest);
+        List<Tarefa> tarefas = tarefaRepository.buscarTodasTarefasPorIdUsuario(tarefa.getIdUsuario());
+        tarefaRepository.defineNovaPosicaoDaTarefa(tarefa,tarefas,novaPosicaoDaTarefaRequest);
         log.info("[finaliza] TarefaApplicationService - mudaOrdemDatarefa");
     }
+
+	@Override
+	public List<TarefaListResponse> buscarTodasTarefas(String usuario, UUID idUsuario) {
+		log.info("[inicia] TarefaApplicationService - buscarTodasTarefas");
+        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
+        usuarioRepository.buscaUsuarioPorId(idUsuario);
+        usuarioPorEmail.validaUsuario(idUsuario);
+        List<Tarefa> tarefas = tarefaRepository.buscarTodasTarefasPorIdUsuario(idUsuario);
+        log.info("[finaliza] TarefaApplicationService - buscarTodasTarefas");
+		return TarefaListResponse.converter(tarefas);
+	}
 }

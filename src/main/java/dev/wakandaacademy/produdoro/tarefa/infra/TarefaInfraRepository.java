@@ -13,12 +13,12 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 
 @Repository
 @Log4j2
@@ -39,6 +39,7 @@ public class TarefaInfraRepository implements TarefaRepository {
         log.info("[finaliza] TarefaInfraRepository - salva");
         return tarefa;
     }
+
     @Override
     public Optional<Tarefa> buscaTarefaPorId(UUID idTarefa) {
         log.info("[inicia] TarefaInfraRepository - buscaTarefaPorId");
@@ -56,28 +57,18 @@ public class TarefaInfraRepository implements TarefaRepository {
     }
 
     @Override
-    public void defineNovaPosicaoDatarefa(Tarefa tarefa, List<Tarefa> tarefas, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefa) {
+    public void defineNovaPosicaoDaTarefa(Tarefa tarefa, List<Tarefa> tarefas, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefa) {
         log.info("[inicia] TarefaInfraRepository - defineNovaPosicaoDatarefa");
-        validaNovaPosicao(tarefa,tarefas,novaPosicaoDaTarefa);
+        validaNovaPosicao(tarefas,tarefa,novaPosicaoDaTarefa);
         int posicaoAntiga = tarefa.getPosicao();
         int novaPosicao = novaPosicaoDaTarefa.getNovaPosicao();
         List<Tarefa> tarefasComPosicaoAtualizada = IntStream
                 .range(Math.min(novaPosicao, posicaoAntiga), Math.max(novaPosicao, posicaoAntiga))
                 .mapToObj(i -> atualizaPosicaoTarefas(tarefas.get(i), novaPosicao < posicaoAntiga, tarefas))
                 .collect(Collectors.toList());
-        atualizaPosicaoTarefas(tarefa, novaPosicao > posicaoAntiga, tarefas);
         tarefa.setPosicao(novaPosicao);
-        salva(tarefa);
         salvaVariasTarefas(tarefasComPosicaoAtualizada);
-        log.info("[finaliza] TarefaInfraRepository - defineNovaPosicaoDatarefa");
-    }
-
-    @Override
-    public List<Tarefa> buscaTodasAsTarefasDoUsuario(UUID idUsuario) {
-        log.info("[inicia] TarefaInfraRepository - buscaTodasTarefasDoUsuario");
-        List<Tarefa> Tarefas = tarefaSpringMongoDBRepository.findAllByIdUsuarioOrderByPosicao(idUsuario);
-        log.info("[finaliza] TarefaInfraRepository - buscaTodasTarefasDoUsuario");
-        return Tarefas;
+        salva(tarefa);
     }
 
     @Override
@@ -92,7 +83,7 @@ public class TarefaInfraRepository implements TarefaRepository {
         if (incrementa)
             tarefa.incrementaPosicao(tarefas.size());
         else
-            tarefa.decrementaPosicao();
+           tarefa.decrementaPosicao();
         Query queryAtualizacao = new Query(Criteria.where("idTarefa").is(tarefa.getIdTarefa()));
         Update updateAtualizacao = new Update().set("posicao", tarefa.getPosicao());
         mongoTemplate.updateFirst(queryAtualizacao, updateAtualizacao, Tarefa.class);
@@ -100,7 +91,7 @@ public class TarefaInfraRepository implements TarefaRepository {
     }
 
 
-    private void validaNovaPosicao(Tarefa tarefa, List<Tarefa> tarefas, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefa) {
+    private void validaNovaPosicao(List<Tarefa> tarefas, Tarefa tarefa, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefa) {
         int posicaoAntiga = tarefa.getPosicao();
         int tamanhoDalistaDeTarefas = tarefas.size();
 
@@ -110,5 +101,12 @@ public class TarefaInfraRepository implements TarefaRepository {
                     :"A posição enviada é igual a posição atual da tarefa, insira uma nova posição";
             throw APIException.build(HttpStatus.BAD_REQUEST, mensagem);
         }
+    }
+    @Override
+    public List<Tarefa> buscarTodasTarefasPorIdUsuario(UUID idUsuario) {
+        log.info("[inicia] TarefaInfraRepository - buscarTodasTarefasPorIdUsuario");
+        List<Tarefa> todasTarefas = tarefaSpringMongoDBRepository.findAllByIdUsuarioOrderByPosicaoAsc(idUsuario);
+        log.info("[finaliza] TarefaInfraRepository - buscarTodasTarefasPorIdUsuario");
+        return todasTarefas;
     }
 }

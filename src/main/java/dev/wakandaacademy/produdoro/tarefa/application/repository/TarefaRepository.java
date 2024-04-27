@@ -12,7 +12,8 @@ public interface TarefaRepository {
     Tarefa salva(Tarefa tarefa);
     Optional<Tarefa> buscaTarefaPorId(UUID idTarefa);
     int contarTarefasDoUsuario(UUID idUsuario);
-    void defineNovaPosicaoDatarefa(Tarefa tarefa, List<Tarefa> tarefas, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefaRequest);
+    void defineNovaPosicaoDaTarefa(Tarefa tarefa, List<Tarefa> tarefas, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefaRequest);
     void salvaVariasTarefas(List<Tarefa> tarefasComNovasPosicoes);
-    List<Tarefa> buscaTodasAsTarefasDoUsuario(UUID idUsuario);
+	List<Tarefa> buscarTodasTarefasPorIdUsuario(UUID idUsuario);
 }
+
