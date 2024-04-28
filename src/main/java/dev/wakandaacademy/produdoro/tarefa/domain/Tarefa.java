@@ -38,8 +38,9 @@ public class Tarefa {
 	private StatusTarefa status;
 	private StatusAtivacaoTarefa statusAtivacao;
 	private int contagemPomodoro;
+	private Integer posicao;
 
-	public Tarefa(TarefaRequest tarefaRequest) {
+	public Tarefa(TarefaRequest tarefaRequest, int novaPosicao) {
 		this.idTarefa = UUID.randomUUID();
 		this.idUsuario = tarefaRequest.getIdUsuario();
 		this.descricao = tarefaRequest.getDescricao();
@@ -47,6 +48,7 @@ public class Tarefa {
 		this.idProjeto = tarefaRequest.getIdProjeto();
 		this.status = StatusTarefa.A_FAZER;
 		this.statusAtivacao = StatusAtivacaoTarefa.INATIVA;
+		this.posicao = novaPosicao;
 		this.contagemPomodoro = 1;
 	}
 
@@ -54,5 +56,9 @@ public class Tarefa {
 		if(!this.idUsuario.equals(usuarioPorEmail.getIdUsuario())) {
 			throw APIException.build(HttpStatus.UNAUTHORIZED, "Usuário não é dono da Tarefa solicitada!");
 		}
+	}
+
+	public void atualizaPosicao(int novaPosicao) {
+		this.posicao = novaPosicao;
 	}
 }
