@@ -57,18 +57,4 @@ public class Tarefa {
 		}
 	}
 
-	public void incrementaPosicao(int tamanhoLista) {
-		log.info("[start] Tarefa - incrementaPosicao");
-		if (this.posicao < tamanhoLista - 1) {
-			this.posicao++;
-		log.info("[finish] Tarefa - incrementaPosicao");
-		}
-	}
-
-	public void decrementaPosicao() {
-		log.info("[inicia] Tarefa - decrementaPosicao");
-		if (this.posicao > 0)
-			this.posicao--;
-		log.info("[finaliza] Tarefa - decrementaPosicao");
-	}
 }

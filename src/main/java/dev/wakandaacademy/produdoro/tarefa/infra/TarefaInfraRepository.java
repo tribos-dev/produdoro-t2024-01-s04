@@ -49,6 +49,13 @@ public class TarefaInfraRepository implements TarefaRepository {
     }
 
     @Override
+    public void salvaVariasTarefas(List<Tarefa> tarefasComPosicaoAtualizada) {
+        log.info("[inicia] TarefaInfraRepository - salvaVariasTarefas");
+        tarefaSpringMongoDBRepository.saveAll(tarefasComPosicaoAtualizada);
+        log.info("[finaliza] TarefaInfraRepository - salvaVariasTarefas");
+    }
+
+    @Override
     public int contarTarefasDoUsuario(UUID idUsuario) {
         log.info("[inicia] TarefaInfraRepository - contarTarefasDoUsuario");
         int contarTarefas = tarefaSpringMongoDBRepository.countByIdUsuario(idUsuario);
@@ -56,40 +63,28 @@ public class TarefaInfraRepository implements TarefaRepository {
         return contarTarefas;
     }
 
-    @Override
-    public void defineNovaPosicaoDaTarefa(Tarefa tarefa, List<Tarefa> tarefas, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefa) {
-        log.info("[inicia] TarefaInfraRepository - defineNovaPosicaoDatarefa");
-        validaNovaPosicao(tarefas,tarefa,novaPosicaoDaTarefa);
-        int posicaoAntiga = tarefa.getPosicao();
-        int novaPosicao = novaPosicaoDaTarefa.getNovaPosicao();
-        List<Tarefa> tarefasComPosicaoAtualizada = IntStream
-                .range(Math.min(novaPosicao, posicaoAntiga), Math.max(novaPosicao, posicaoAntiga))
-                .mapToObj(i -> atualizaPosicaoTarefas(tarefas.get(i), novaPosicao < posicaoAntiga, tarefas))
-                .collect(Collectors.toList());
-        tarefa.setPosicao(novaPosicao);
-        salvaVariasTarefas(tarefasComPosicaoAtualizada);
-        salva(tarefa);
+    public void defineNovaPosicaoDaTarefa(Tarefa tarefa, List<Tarefa> tarefas, NovaPosicaoDaTarefaRequest novaPosicao) {
+        validaNovaPosicao(tarefas, tarefa, novaPosicao);
+        int posicaoAtualTarefa = tarefa.getPosicao();
+        int novaPosicaoTarefa = novaPosicao.getNovaPosicao();
+
+        if (novaPosicaoTarefa < posicaoAtualTarefa) {
+            IntStream.range(novaPosicaoTarefa, posicaoAtualTarefa)
+                    .forEach(i -> atualizaPosicaoTarefa(tarefas.get(i), i + 1));
+
+        } else if (novaPosicaoTarefa > posicaoAtualTarefa) {
+            IntStream.range(posicaoAtualTarefa + 1, novaPosicaoTarefa + 1)
+                    .forEach(i -> atualizaPosicaoTarefa(tarefas.get(i), i - 1));
+        }
+        tarefa.setPosicao(novaPosicaoTarefa);
+        atualizaPosicaoTarefa(tarefa, novaPosicaoTarefa);
     }
 
-    @Override
-    public void salvaVariasTarefas(List<Tarefa> tarefasComPosicaoAtualizada) {
-        log.info("[inicia] TarefaInfraRepository - salvaVariasTarefas");
-        tarefaSpringMongoDBRepository.saveAll(tarefasComPosicaoAtualizada);
-        log.info("[finaliza] TarefaInfraRepository - salvaVariasTarefas");
+    private void atualizaPosicaoTarefa(Tarefa tarefa, int novaPosicao) {
+        Query query = new Query(Criteria.where("idTarefa").is(tarefa.getIdTarefa()));
+        Update update = new Update().set("posicao", novaPosicao);
+        mongoTemplate.updateFirst(query, update, Tarefa.class);
     }
-
-
-    private Tarefa atualizaPosicaoTarefas(Tarefa tarefa, Boolean incrementa, List<Tarefa> tarefas) {
-        if (incrementa)
-            tarefa.incrementaPosicao(tarefas.size());
-        else
-           tarefa.decrementaPosicao();
-        Query queryAtualizacao = new Query(Criteria.where("idTarefa").is(tarefa.getIdTarefa()));
-        Update updateAtualizacao = new Update().set("posicao", tarefa.getPosicao());
-        mongoTemplate.updateFirst(queryAtualizacao, updateAtualizacao, Tarefa.class);
-        return tarefa;
-    }
-
 
     private void validaNovaPosicao(List<Tarefa> tarefas, Tarefa tarefa, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefa) {
         int posicaoAntiga = tarefa.getPosicao();
