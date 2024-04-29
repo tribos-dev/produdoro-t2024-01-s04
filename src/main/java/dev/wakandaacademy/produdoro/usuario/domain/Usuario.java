@@ -4,11 +4,12 @@ import java.util.UUID;
 
 import javax.validation.constraints.Email;
 
-import dev.wakandaacademy.produdoro.handler.APIException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.http.HttpStatus;
 
+import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.pomodoro.domain.ConfiguracaoPadrao;
 import dev.wakandaacademy.produdoro.usuario.application.api.UsuarioNovoRequest;
 import lombok.AccessLevel;
@@ -17,12 +18,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.http.HttpStatus;
+import lombok.extern.log4j.Log4j2;
 
 @Builder
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
+@Log4j2
 @ToString
 @Document(collection = "Usuario")
 public class Usuario {
@@ -36,7 +38,7 @@ public class Usuario {
 	private StatusUsuario status = StatusUsuario.FOCO;
 	@Builder.Default
 	private Integer quantidadePomodorosPausaCurta = 0;
-	
+
 	public Usuario(UsuarioNovoRequest usuarioNovo, ConfiguracaoPadrao configuracaoPadrao) {
 		this.idUsuario = UUID.randomUUID();
 		this.email = usuarioNovo.getEmail();
@@ -44,30 +46,40 @@ public class Usuario {
 		this.configuracao = new ConfiguracaoUsuario(configuracaoPadrao);
 	}
 
-    public void alteraStatusParaFoco(UUID idUsuario) {
-        validaUsuario(idUsuario);
-        verificaStatusAtual();
-    }
+	public void alteraStatusParaFoco(UUID idUsuario) {
+		validaUsuario(idUsuario);
+		verificaStatusAtual();
+	}
 
-    public void validaUsuario(UUID idUsuario) {
-        if (!this.idUsuario.equals(idUsuario)) {
-            throw APIException.build(HttpStatus.UNAUTHORIZED, "Credencial de autenticação não é válida");
+	public void validaUsuario(UUID idUsuario) {
+		if (!this.idUsuario.equals(idUsuario)) {
+			throw APIException.build(HttpStatus.UNAUTHORIZED, "Credencial de autenticação não é válida.");
 
-        }
-    }
+		}
+	}
 
-    private void verificaStatusAtual() {
-        if (this.status.equals(StatusUsuario.FOCO)) {
-            throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário já esta em FOCO!");
+	private void verificaStatusAtual() {
+		if (this.status.equals(StatusUsuario.FOCO)) {
+			throw APIException.build(HttpStatus.BAD_REQUEST, "Usuário já esta em FOCO!");
 
-        }
-        mudaStatusParaFoco();
-    }
+		}
+		mudaStatusParaFoco();
+	}
 
-    private void mudaStatusParaFoco() {
-        this.status = StatusUsuario.FOCO;
-    }
+	private void mudaStatusParaFoco() {
+		this.status = StatusUsuario.FOCO;
+	}
 
+	public void pertenceAoUsuario(Usuario usuarioPorEmail) {
+		if (!this.idUsuario.equals(usuarioPorEmail.getIdUsuario())) {
+			throw APIException.build(HttpStatus.UNAUTHORIZED,
+					"Usúario(a) não autorizado(a) para a requisição solicitada!");
+		}
+	}
 
-
+	public void mudaStatusPausaLonga() {
+		log.info("[inicia] Usuario - mudaStatusPausaLonga");
+		this.status = StatusUsuario.PAUSA_LONGA;
+		log.info("[finaliza] Usuario - mudaStatusPausaLonga");
+	}
 }
