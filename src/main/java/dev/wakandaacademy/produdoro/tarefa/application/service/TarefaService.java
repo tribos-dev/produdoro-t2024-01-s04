@@ -18,5 +18,7 @@ public interface TarefaService {
 
 	void deletaTarefasConcluidas(String email, UUID idUsuario);
 
+	void deletaTodasAsTarefasDoUsuario(String usuario, UUID idUsuario);
+
 	List<TarefaListResponse> buscarTodasTarefas(String usuario, UUID idUsuario);
 }

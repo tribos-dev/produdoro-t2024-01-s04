@@ -46,6 +46,13 @@ public class Usuario {
 		this.configuracao = new ConfiguracaoUsuario(configuracaoPadrao);
 	}
 
+	public void pertenceAoUsuario(Usuario usuarioPorEmail) {
+		if (!this.idUsuario.equals(usuarioPorEmail.getIdUsuario())) {
+			throw APIException.build(HttpStatus.UNAUTHORIZED,
+					"Usúario(a) não autorizado(a) para a requisição solicitada!");
+		}
+	}
+
 	public void alteraStatusParaFoco(UUID idUsuario) {
 		validaUsuario(idUsuario);
 		verificaStatusAtual();
@@ -70,16 +77,10 @@ public class Usuario {
 		this.status = StatusUsuario.FOCO;
 	}
 
-	public void pertenceAoUsuario(Usuario usuarioPorEmail) {
-		if (!this.idUsuario.equals(usuarioPorEmail.getIdUsuario())) {
-			throw APIException.build(HttpStatus.UNAUTHORIZED,
-					"Usúario(a) não autorizado(a) para a requisição solicitada!");
-		}
-	}
-
 	public void mudaStatusPausaLonga() {
 		log.info("[inicia] Usuario - mudaStatusPausaLonga");
 		this.status = StatusUsuario.PAUSA_LONGA;
 		log.info("[finaliza] Usuario - mudaStatusPausaLonga");
 	}
+
 }

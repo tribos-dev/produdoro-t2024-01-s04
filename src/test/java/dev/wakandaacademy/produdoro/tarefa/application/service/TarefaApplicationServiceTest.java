@@ -63,6 +63,106 @@ class TarefaApplicationServiceTest {
 	}
 
 	@Test
+	@DisplayName("Deleta todas as tarefas do usuario com sucesso")
+	void deletaTodasAsTarefasDoUsuario_comDadosValidos_sucesso() {
+		Usuario usuario = DataHelper.createUsuario();
+		List<Tarefa> tarefasDoUsuario = DataHelper.createListTarefa();
+		String email = usuario.getEmail();
+		UUID idUsuario = usuario.getIdUsuario();
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+		when(usuarioRepository.buscaUsuarioPorId(any())).thenReturn(usuario);
+		when(tarefaRepository.buscarTodasTarefasPorIdUsuario(any())).thenReturn(tarefasDoUsuario);
+
+		tarefaApplicationService.deletaTodasAsTarefasDoUsuario(email, idUsuario);
+
+		verify(tarefaRepository, times(1)).deletaTodasAsTarefasDoUsuario(tarefasDoUsuario);
+	}
+
+	@Test
+	@DisplayName("Deleta todas as tarefas do usuario quando emailUsuario for inexistente")
+	void deletaTodasAsTarefasDoUsuario_comEmailInexistente_retornaAPIException() {
+		when(usuarioRepository.buscaUsuarioPorEmail(any()))
+				.thenThrow(APIException.build(HttpStatus.BAD_REQUEST, "Usuario não encontrado!"));
+
+		assertThrows(APIException.class,
+				() -> tarefaApplicationService.deletaTodasAsTarefasDoUsuario("exemplo@gmail.com", UUID.randomUUID()));
+
+		verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(any());
+	}
+
+	@Test
+	@DisplayName("Deleta todas as tarefas do usuario quando idUsuario for inexistente")
+	void deletaTodasAsTarefasDoUsuario_comIdUsuarioInexistente_retornaAPIException() {
+		Usuario usuario = DataHelper.createUsuario();
+		String email = usuario.getEmail();
+		UUID idInexistente = UUID.randomUUID();
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+		when(usuarioRepository.buscaUsuarioPorId(any()))
+				.thenThrow(APIException.build(HttpStatus.BAD_REQUEST, "Usuario não encontrado!"));
+
+		assertThrows(APIException.class,
+				() -> tarefaApplicationService.deletaTodasAsTarefasDoUsuario(email, idInexistente));
+
+		verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(any());
+		verify(usuarioRepository, times(1)).buscaUsuarioPorId(any());
+	}
+
+	@Test
+	@DisplayName("Deleta todas as tarefas do usuario quando usuarioEmail nao pertence ao usuario")
+	void deletaTodasAsTarefasDoUsuario_comUsuarioEmailNaoPertenceAoUsuario_retornaAPIException() {
+		Usuario usuario = DataHelper.createUsuario();
+		Usuario usuarioTeste = DataHelper.createUsuarioTeste();
+		String email = usuarioTeste.getEmail();
+		UUID idUsuario = usuario.getIdUsuario();
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuarioTeste);
+		when(usuarioRepository.buscaUsuarioPorId(any())).thenReturn(usuario);
+
+		APIException ex = assertThrows(APIException.class,
+				() -> tarefaApplicationService.deletaTodasAsTarefasDoUsuario(email, idUsuario));
+
+		assertEquals("Usúario(a) não autorizado(a) para a requisição solicitada!", ex.getMessage());
+		assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusException());
+	}
+
+	@Test
+	@DisplayName("Deleta todas as tarefas do usuario quando usuario nao possui tarefas cadastradas")
+	void deletaTodasAsTarefasDoUsuario_quandoUsuarioNaoPossuiTarefaCadastrada_retornaAPIException() {
+		Usuario usuario = DataHelper.createUsuario();
+		String email = usuario.getEmail();
+		UUID idUsuario = usuario.getIdUsuario();
+		List<Tarefa> listaVazia = List.of();
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+		when(usuarioRepository.buscaUsuarioPorId(any())).thenReturn(usuario);
+		when(tarefaRepository.buscarTodasTarefasPorIdUsuario(any())).thenReturn(listaVazia);
+
+		APIException ex = assertThrows(APIException.class,
+				() -> tarefaApplicationService.deletaTodasAsTarefasDoUsuario(email, idUsuario));
+
+		assertEquals("Usúario não possui nenhuma tarefa cadastrada!", ex.getMessage());
+		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusException());
+	}
+
+	@Test
+	void deveListarTodasAsTarefas() {
+		// Dado
+		Usuario usuario = DataHelper.createUsuario();
+		List<Tarefa> tarefas = DataHelper.createListTarefa();
+		// Quando
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+		when(usuarioRepository.buscaUsuarioPorId(any())).thenReturn(usuario);
+		when(tarefaRepository.buscarTodasTarefasPorIdUsuario(any())).thenReturn(tarefas);
+
+		List<TarefaListResponse> resultado = tarefaApplicationService.buscarTodasTarefas(usuario.getEmail(),
+				usuario.getIdUsuario());
+
+		// Então
+		verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(usuario.getEmail());
+		verify(usuarioRepository, times(1)).buscaUsuarioPorId(usuario.getIdUsuario());
+		verify(tarefaRepository, times(1)).buscarTodasTarefasPorIdUsuario(usuario.getIdUsuario());
+		assertEquals(resultado.size(), 8);
+	}
+
+	@Test
 	@DisplayName("Deleta tarefas concluidas")
 	void deletaTarefasConcluidas_comDadosValidos_sucesso() {
 		Usuario usuario = DataHelper.createUsuario();
@@ -142,26 +242,6 @@ class TarefaApplicationServiceTest {
 
 		assertEquals("Usúario não possui nenhuma tarefa concluída!", ex.getMessage());
 		assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusException());
-	}
-
-	@Test
-	void deveListarTodasAsTarefas() {
-		// Dado
-		Usuario usuario = DataHelper.createUsuario();
-		List<Tarefa> tarefas = DataHelper.createListTarefa();
-		// Quando
-		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
-		when(usuarioRepository.buscaUsuarioPorId(any())).thenReturn(usuario);
-		when(tarefaRepository.buscarTodasTarefasPorIdUsuario(any())).thenReturn(tarefas);
-
-		List<TarefaListResponse> resultado = tarefaApplicationService.buscarTodasTarefas(usuario.getEmail(),
-				usuario.getIdUsuario());
-
-		// Então
-		verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(usuario.getEmail());
-		verify(usuarioRepository, times(1)).buscaUsuarioPorId(usuario.getIdUsuario());
-		verify(tarefaRepository, times(1)).buscarTodasTarefasPorIdUsuario(usuario.getIdUsuario());
-		assertEquals(resultado.size(), 8);
 	}
 
 	@Test

@@ -61,8 +61,7 @@ public class TarefaInfraRepository implements TarefaRepository {
 	public List<Tarefa> buscaTarefasConcluidas(UUID idUsuario) {
 		log.info("[inicia] TarefaInfraRepository - buscaTarefasConcluidas");
 		Query query = new Query();
-		query.addCriteria(Criteria.where("idUsuario").is(idUsuario)
-				.and("status").is(StatusTarefa.CONCLUIDA));
+		query.addCriteria(Criteria.where("idUsuario").is(idUsuario).and("status").is(StatusTarefa.CONCLUIDA));
 		List<Tarefa> tarefasConcluidas = mongoTemplate.find(query, Tarefa.class);
 		log.info("[finaliza] TarefaInfraRepository - buscaTarefasConclidas");
 		return tarefasConcluidas;
@@ -80,24 +79,30 @@ public class TarefaInfraRepository implements TarefaRepository {
 		log.info("[inicia] TarefaInfraRepository - atualizaPosicaoDasTarefas");
 		int tamanhoDaLista = tarefasDoUsuario.size();
 		List<Tarefa> tarefasAtualizadas = IntStream.range(0, tamanhoDaLista)
-			.mapToObj(i -> atualizaTarefaComNovaPosicao(tarefasDoUsuario.get(i), i))
-			.collect(Collectors.toList());
-			salvaVariasTarefas(tarefasAtualizadas);
+				.mapToObj(i -> atualizaTarefaComNovaPosicao(tarefasDoUsuario.get(i), i)).collect(Collectors.toList());
+		salvaVariasTarefas(tarefasAtualizadas);
 		log.info("[finaliza] TarefaInfraRepository - atualizaPosicaoDasTarefas");
 	}
-	
+
 	private Tarefa atualizaTarefaComNovaPosicao(Tarefa tarefa, int novaPosicao) {
 		log.info("[inicia] TarefaInfraRepository - atualizaTarefaComNovaPosicao");
 		tarefa.atualizaPosicao(novaPosicao);
 		log.info("[finaliza] TarefaInfraRepository - atualizaTarefaComNovaPosicao");
 		return tarefa;
 	}
-	
+
 	@Override
 	public void salvaVariasTarefas(List<Tarefa> tarefasDoUsuario) {
 		log.info("[inicia] TarefaInfraRepository - salvaVariasTarefas");
 		tarefaSpringMongoDBRepository.saveAll(tarefasDoUsuario);
 		log.info("[finaliza] TarefaInfraRepository - salvaVariasTarefas");
+	}
+
+	@Override
+	public void deletaTodasAsTarefasDoUsuario(List<Tarefa> tarefasDoUsuario) {
+		log.info("[inicia] TarefaInfraRepository - deletaTodasAsTarefasDoUsuario");
+		tarefaSpringMongoDBRepository.deleteAll(tarefasDoUsuario);
+		log.info("[finaliza] TarefaInfraRepository - deletaTodasAsTarefasDoUsuario");
 	}
 
 	@Override
