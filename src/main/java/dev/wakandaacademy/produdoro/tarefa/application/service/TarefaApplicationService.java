@@ -1,6 +1,7 @@
 package dev.wakandaacademy.produdoro.tarefa.application.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -76,6 +77,34 @@ public class TarefaApplicationService implements TarefaService {
 		}
 		tarefaRepository.deletaTodasAsTarefasDoUsuario(tarefasDoUsuario);
 		log.info("[finaliza] TarefaApplicationService - deletaTodasAsTarefasDoUsuario");
+	}
+
+	@Override
+	public void definiTarefaComoAtiva(String usuario, UUID idTarefa) {
+		log.info("[inicia] TarefaApplicationService - definirTarefaComoAtiva");
+		Usuario usuarioEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
+
+		validarTarefa(idTarefa, usuarioEmail);
+
+		Optional<Tarefa> tarefaAtivaOptional = tarefaRepository.buscaTarefaAtivada();
+
+		tarefaAtivaOptional.ifPresent(tarefaAtiva -> {
+			tarefaAtiva.definirComoInativa();
+			tarefaRepository.salva(tarefaAtiva);
+		});
+
+		Tarefa novaTarefa = tarefaRepository.buscaTarefaPorId(idTarefa)
+				.orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Tarefa não encontrada."));
+		novaTarefa.definirComoAtiva();
+		tarefaRepository.salva(novaTarefa);
+		log.info("[finaliza] TarefaApplicationService - definirTarefaComoAtiva");
+	}
+
+	private Tarefa validarTarefa(UUID idTarefa, Usuario usuarioEmail) {
+		Tarefa tarefa = tarefaRepository.buscaTarefaPorId(idTarefa)
+				.orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Id Da Tarefa Inválido"));
+		tarefa.pertenceAoUsuario(usuarioEmail);
+		return tarefa;
 	}
 
 	@Override

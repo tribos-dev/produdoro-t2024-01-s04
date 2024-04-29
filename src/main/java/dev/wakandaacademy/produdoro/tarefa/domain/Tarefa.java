@@ -18,11 +18,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @Builder
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
+@Log4j2
 @Document(collection = "Tarefa")
 public class Tarefa {
 	@Id
@@ -53,15 +55,28 @@ public class Tarefa {
 	}
 
 	public void pertenceAoUsuario(Usuario usuarioPorEmail) {
-		if(!this.idUsuario.equals(usuarioPorEmail.getIdUsuario())) {
+		if (!this.idUsuario.equals(usuarioPorEmail.getIdUsuario())) {
 			throw APIException.build(HttpStatus.UNAUTHORIZED, "Usuário não é dono da Tarefa solicitada!");
+		}
+	}
+
+	public void definirComoInativa() {
+		if (this.statusAtivacao.equals(StatusAtivacaoTarefa.ATIVA)) {
+			statusAtivacao = StatusAtivacaoTarefa.INATIVA;
+		}
+	}
+
+	public void definirComoAtiva() {
+		if (this.statusAtivacao.equals(StatusAtivacaoTarefa.INATIVA)) {
+			statusAtivacao = StatusAtivacaoTarefa.ATIVA;
 		}
 	}
 
 	public void edita(EditaTarefaRequest tarefaRequest) {
 		this.descricao = tarefaRequest.getDescricao();
-}
-		public void atualizaPosicao(int novaPosicao) {
+	}
+
+	public void atualizaPosicao(int novaPosicao) {
 		this.posicao = novaPosicao;
 	}
 }

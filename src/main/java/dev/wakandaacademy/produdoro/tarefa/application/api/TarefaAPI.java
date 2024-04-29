@@ -29,15 +29,20 @@ public interface TarefaAPI {
 	TarefaDetalhadoResponse detalhaTarefa(@RequestHeader(name = "Authorization", required = true) String token,
 			@PathVariable UUID idTarefa);
 
-	@DeleteMapping(value = "/deleta-tarefa/{idTarefa}")
-	@ResponseStatus(code = HttpStatus.NO_CONTENT)
-	void deletaTarefa(@PathVariable UUID idTarefa,
-			@RequestHeader(name = "Authorization", required = true) String token);
+	@PatchMapping("/{idTarefa}/ativa")
+	@ResponseStatus(code = HttpStatus.OK)
+	void definiTarefaComoAtiva(@RequestHeader(name = "Authorization", required = true) String token,
+			@PathVariable UUID idTarefa);
 
 	@GetMapping("/listar-tarefa/{idUsuario}")
 	@ResponseStatus(code = HttpStatus.OK)
 	List<TarefaListResponse> listarTodasTarefas(@RequestHeader(name = "Authorization", required = true) String token,
 			@PathVariable UUID idUsuario);
+
+	@DeleteMapping(value = "/deleta-tarefa/{idTarefa}")
+	@ResponseStatus(code = HttpStatus.NO_CONTENT)
+	void deletaTarefa(@PathVariable UUID idTarefa,
+			@RequestHeader(name = "Authorization", required = true) String token);
 
 	@DeleteMapping("/usuario/{idUsuario}/limpar-todas-as-tarefas")
 	@ResponseStatus(code = HttpStatus.NO_CONTENT)

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
+import dev.wakandaacademy.produdoro.tarefa.domain.StatusAtivacaoTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.StatusTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 import lombok.RequiredArgsConstructor;
@@ -103,6 +104,14 @@ public class TarefaInfraRepository implements TarefaRepository {
 		log.info("[inicia] TarefaInfraRepository - deletaTodasAsTarefasDoUsuario");
 		tarefaSpringMongoDBRepository.deleteAll(tarefasDoUsuario);
 		log.info("[finaliza] TarefaInfraRepository - deletaTodasAsTarefasDoUsuario");
+	}
+
+	@Override
+	public Optional<Tarefa> buscaTarefaAtivada() {
+		log.info("[inicia] TarefaInfraRepository - buscarTarefaAtivada");
+		Optional<Tarefa> tarefa = tarefaSpringMongoDBRepository.findFirstByStatusAtivacao(StatusAtivacaoTarefa.ATIVA);
+		log.info("[finaliza] TarefaInfraRepository - buscarTarefaAtivada");
+		return tarefa;
 	}
 
 	@Override

@@ -12,6 +12,10 @@ public interface TarefaRepository {
 
 	Optional<Tarefa> buscaTarefaPorId(UUID idTarefa);
 
+	Optional<Tarefa> buscaTarefaAtivada();
+
+	List<Tarefa> buscarTodasTarefasPorIdUsuario(UUID idUsuario);
+
 	void deletaTodasAsTarefasDoUsuario(List<Tarefa> tarefasDoUsuario);
 
 	int contarTarefas(UUID idUsuario);
@@ -23,8 +27,6 @@ public interface TarefaRepository {
 	void atualizaPosicaoDasTarefas(List<Tarefa> tarefasDoUsuario);
 
 	void salvaVariasTarefas(List<Tarefa> tarefasDoUsuario);
-
-	List<Tarefa> buscarTodasTarefasPorIdUsuario(UUID idUsuario);
 
 	void deleta(Tarefa tarefa);
 }
