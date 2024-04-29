@@ -59,6 +59,7 @@ public class TarefaInfraRepository implements TarefaRepository {
 		return contarTarefas;
 	}
 
+	@Override
 	public void defineNovaPosicaoDaTarefa(Tarefa tarefa, List<Tarefa> tarefas, NovaPosicaoDaTarefaRequest novaPosicao) {
 		validaNovaPosicao(tarefas, tarefa, novaPosicao);
 		int posicaoAtualTarefa = tarefa.getPosicao();
