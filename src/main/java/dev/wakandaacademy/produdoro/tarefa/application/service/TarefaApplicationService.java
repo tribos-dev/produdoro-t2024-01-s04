@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import dev.wakandaacademy.produdoro.handler.APIException;
+import dev.wakandaacademy.produdoro.tarefa.application.api.EditaTarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaIdResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
@@ -65,11 +66,21 @@ public class TarefaApplicationService implements TarefaService {
 	@Override
 	public List<TarefaListResponse> buscarTodasTarefas(String usuario, UUID idUsuario) {
 		log.info("[inicia] TarefaApplicationService - buscarTodasTarefas");
-        Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
-        usuarioRepository.buscaUsuarioPorId(idUsuario);
-        usuarioPorEmail.validaUsuario(idUsuario);
-        List<Tarefa> tarefas = tarefaRepository.buscarTodasTarefasPorIdUsuario(idUsuario);
-        log.info("[finaliza] TarefaApplicationService - buscarTodasTarefas");
+		Usuario usuarioPorEmail = usuarioRepository.buscaUsuarioPorEmail(usuario);
+		usuarioRepository.buscaUsuarioPorId(idUsuario);
+		usuarioPorEmail.validaUsuario(idUsuario);
+		List<Tarefa> tarefas = tarefaRepository.buscarTodasTarefasPorIdUsuario(idUsuario);
+		log.info("[finaliza] TarefaApplicationService - buscarTodasTarefas");
 		return TarefaListResponse.converter(tarefas);
 	}
+
+	@Override
+	public void editaTarefa(String emailUsuario, UUID idTarefa, EditaTarefaRequest tarefaRequest) {
+		log.info("[inicia] TarefaApplicationService - editaTarefa");
+		Tarefa tarefa = detalhaTarefa(emailUsuario, idTarefa);
+		tarefa.edita(tarefaRequest);
+		tarefaRepository.salva(tarefa);
+		log.info("[finaliza] TarefaApplicationService - editaTarefa");
+	}
+
 }
