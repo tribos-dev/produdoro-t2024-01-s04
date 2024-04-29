@@ -94,6 +94,7 @@ public class TarefaRestController implements TarefaAPI {
 		log.info("[finaliza] TarefaRestController - mudaOrdemdaTarefa");
 	}
 
+	@Override
 	public List<TarefaListResponse> listarTodasTarefas(String token, UUID idUsuario) {
 		log.info("[inicia] TarefaRestController - listarTodasTarefas");
 		String usuario = getUsuarioByToken(token);
