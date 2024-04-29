@@ -10,10 +10,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 import dev.wakandaacademy.produdoro.handler.APIException;
+import dev.wakandaacademy.produdoro.tarefa.application.api.NovaPosicaoDaTarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
 import dev.wakandaacademy.produdoro.tarefa.domain.StatusAtivacaoTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.StatusTarefa;
@@ -47,6 +49,52 @@ public class TarefaInfraRepository implements TarefaRepository {
 		Optional<Tarefa> tarefaPorId = tarefaSpringMongoDBRepository.findByIdTarefa(idTarefa);
 		log.info("[finaliza] TarefaInfraRepository - buscaTarefaPorId");
 		return tarefaPorId;
+	}
+
+	@Override
+	public int contarTarefasDoUsuario(UUID idUsuario) {
+		log.info("[inicia] TarefaInfraRepository - contarTarefasDoUsuario");
+		int contarTarefas = tarefaSpringMongoDBRepository.countByIdUsuario(idUsuario);
+		log.info("[finaliza] TarefaInfraRepository - contarTarefasDoUsuario");
+		return contarTarefas;
+	}
+
+	@Override
+	public void defineNovaPosicaoDaTarefa(Tarefa tarefa, List<Tarefa> tarefas, NovaPosicaoDaTarefaRequest novaPosicao) {
+		validaNovaPosicao(tarefas, tarefa, novaPosicao);
+		int posicaoAtualTarefa = tarefa.getPosicao();
+		int novaPosicaoTarefa = novaPosicao.getNovaPosicao();
+
+		if (novaPosicaoTarefa < posicaoAtualTarefa) {
+			IntStream.range(novaPosicaoTarefa, posicaoAtualTarefa)
+					.forEach(i -> atualizaPosicaoTarefa(tarefas.get(i), i + 1));
+
+		} else if (novaPosicaoTarefa > posicaoAtualTarefa) {
+			IntStream.range(posicaoAtualTarefa + 1, novaPosicaoTarefa + 1)
+					.forEach(i -> atualizaPosicaoTarefa(tarefas.get(i), i - 1));
+		}
+		tarefa.atualizaPosicao(novaPosicaoTarefa);
+		atualizaPosicaoTarefa(tarefa, novaPosicaoTarefa);
+	}
+
+	private void atualizaPosicaoTarefa(Tarefa tarefa, int novaPosicao) {
+		Query query = new Query(Criteria.where("idTarefa").is(tarefa.getIdTarefa()));
+		Update update = new Update().set("posicao", novaPosicao);
+		mongoTemplate.updateFirst(query, update, Tarefa.class);
+	}
+
+	private void validaNovaPosicao(List<Tarefa> tarefas, Tarefa tarefa,
+			NovaPosicaoDaTarefaRequest novaPosicaoDaTarefa) {
+		int posicaoAntiga = tarefa.getPosicao();
+		int tamanhoDalistaDeTarefas = tarefas.size();
+
+		if (novaPosicaoDaTarefa.getNovaPosicao() >= tamanhoDalistaDeTarefas
+				|| novaPosicaoDaTarefa.getNovaPosicao().equals(posicaoAntiga)) {
+			String mensagem = novaPosicaoDaTarefa.getNovaPosicao() >= tamanhoDalistaDeTarefas
+					? "A posição da tarefa não pode ser maior, nem igual a quantidade de tarefas do usuario"
+					: "A posição enviada é igual a posição atual da tarefa, insira uma nova posição";
+			throw APIException.build(HttpStatus.BAD_REQUEST, mensagem);
+		}
 	}
 
 	@Override
@@ -117,7 +165,7 @@ public class TarefaInfraRepository implements TarefaRepository {
 	@Override
 	public List<Tarefa> buscarTodasTarefasPorIdUsuario(UUID idUsuario) {
 		log.info("[inicia] TarefaInfraRepository - buscarTodasTarefasPorIdUsuario");
-		List<Tarefa> todasTarefas = tarefaSpringMongoDBRepository.findAllByIdUsuario(idUsuario);
+		List<Tarefa> todasTarefas = tarefaSpringMongoDBRepository.findAllByIdUsuarioOrderByPosicaoAsc(idUsuario);
 		log.info("[finaliza] TarefaInfraRepository - buscarTodasTarefasPorIdUsuario");
 		return todasTarefas;
 	}

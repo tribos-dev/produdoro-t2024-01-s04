@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.api.EditaTarefaRequest;
+import dev.wakandaacademy.produdoro.tarefa.application.api.NovaPosicaoDaTarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaIdResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
@@ -105,6 +106,16 @@ public class TarefaApplicationService implements TarefaService {
 				.orElseThrow(() -> APIException.build(HttpStatus.NOT_FOUND, "Id Da Tarefa Inválido"));
 		tarefa.pertenceAoUsuario(usuarioEmail);
 		return tarefa;
+	}
+
+	@Override
+	public void mudaOrdemDaTarefa(String emailDoUsuario, UUID idTarefa,
+			NovaPosicaoDaTarefaRequest novaPosicaoDaTarefaRequest) {
+		log.info("[inicia] TarefaApplicationService - mudaOrdemDatarefa");
+		Tarefa tarefa = detalhaTarefa(emailDoUsuario, idTarefa);
+		List<Tarefa> tarefas = tarefaRepository.buscarTodasTarefasPorIdUsuario(tarefa.getIdUsuario());
+		tarefaRepository.defineNovaPosicaoDaTarefa(tarefa, tarefas, novaPosicaoDaTarefaRequest);
+		log.info("[finaliza] TarefaApplicationService - mudaOrdemDatarefa");
 	}
 
 	@Override

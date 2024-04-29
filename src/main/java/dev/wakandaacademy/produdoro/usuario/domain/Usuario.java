@@ -1,5 +1,6 @@
 package dev.wakandaacademy.produdoro.usuario.domain;
 
+
 import java.util.UUID;
 
 import javax.validation.constraints.Email;
@@ -46,12 +47,6 @@ public class Usuario {
 		this.configuracao = new ConfiguracaoUsuario(configuracaoPadrao);
 	}
 
-	public void validaUsuario(UUID idUsuario2) {
-		if (!this.idUsuario.equals(idUsuario2)) {
-			throw APIException.build(HttpStatus.UNAUTHORIZED, "Credencial de autenticação não é válida.");
-		}
-	}
-
 	public void mudaStatusParaPausaCurta() {
 		this.status = StatusUsuario.PAUSA_CURTA;
 	}
@@ -86,4 +81,9 @@ public class Usuario {
 		log.info("[finaliza] Usuario - mudaStatusPausaLonga");
 	}
 
+	public void validaUsuario(UUID idUsuario) {
+		if (!this.idUsuario.equals(idUsuario)) {
+			throw APIException.build(HttpStatus.UNAUTHORIZED, "Credencial de autenticação não é válida.");
+		}
+	}
 }

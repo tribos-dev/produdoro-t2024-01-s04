@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import dev.wakandaacademy.produdoro.tarefa.application.api.NovaPosicaoDaTarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 
 public interface TarefaRepository {
@@ -12,9 +13,16 @@ public interface TarefaRepository {
 
 	Optional<Tarefa> buscaTarefaPorId(UUID idTarefa);
 
-	Optional<Tarefa> buscaTarefaAtivada();
+	int contarTarefasDoUsuario(UUID idUsuario);
+
+	void defineNovaPosicaoDaTarefa(Tarefa tarefa, List<Tarefa> tarefas,
+			NovaPosicaoDaTarefaRequest novaPosicaoDaTarefaRequest);
+
+	void salvaVariasTarefas(List<Tarefa> tarefasComNovasPosicoes);
 
 	List<Tarefa> buscarTodasTarefasPorIdUsuario(UUID idUsuario);
+
+	Optional<Tarefa> buscaTarefaAtivada();
 
 	void deletaTodasAsTarefasDoUsuario(List<Tarefa> tarefasDoUsuario);
 
@@ -25,8 +33,6 @@ public interface TarefaRepository {
 	void deletaVariasTarefas(List<Tarefa> tarefasConcluidas);
 
 	void atualizaPosicaoDasTarefas(List<Tarefa> tarefasDoUsuario);
-
-	void salvaVariasTarefas(List<Tarefa> tarefasDoUsuario);
 
 	void deleta(Tarefa tarefa);
 }

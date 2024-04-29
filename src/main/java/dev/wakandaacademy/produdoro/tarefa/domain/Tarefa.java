@@ -20,11 +20,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 @Builder
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
-@Log4j2
 @Document(collection = "Tarefa")
 public class Tarefa {
 	@Id
@@ -50,8 +50,9 @@ public class Tarefa {
 		this.idProjeto = tarefaRequest.getIdProjeto();
 		this.status = StatusTarefa.A_FAZER;
 		this.statusAtivacao = StatusAtivacaoTarefa.INATIVA;
-		this.posicao = novaPosicao;
 		this.contagemPomodoro = 1;
+		this.posicao = novaPosicao;
+
 	}
 
 	public void pertenceAoUsuario(Usuario usuarioPorEmail) {

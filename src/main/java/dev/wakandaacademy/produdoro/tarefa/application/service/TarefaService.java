@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import dev.wakandaacademy.produdoro.tarefa.application.api.EditaTarefaRequest;
+import dev.wakandaacademy.produdoro.tarefa.application.api.NovaPosicaoDaTarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaIdResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
@@ -14,11 +15,13 @@ public interface TarefaService {
 
 	Tarefa detalhaTarefa(String usuario, UUID idTarefa);
 
+	void mudaOrdemDaTarefa(String emailDoUsuario, UUID idTarefa, NovaPosicaoDaTarefaRequest novaPosicaoDaTarefaRequest);
+
+	List<TarefaListResponse> buscarTodasTarefas(String usuario, UUID idUsuario);
+
 	void concluiTarefa(String usuario, UUID idTarefa);
 
 	void definiTarefaComoAtiva(String usuario, UUID idTarefa);
-
-	List<TarefaListResponse> buscarTodasTarefas(String usuario, UUID idUsuario);
 
 	void editaTarefa(String emailUsuario, UUID idTarefa, EditaTarefaRequest tarefaRequest);
 

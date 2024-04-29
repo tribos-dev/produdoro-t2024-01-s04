@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import dev.wakandaacademy.produdoro.DataHelper;
 import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.api.EditaTarefaRequest;
+import dev.wakandaacademy.produdoro.tarefa.application.api.NovaPosicaoDaTarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaIdResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
@@ -46,8 +47,8 @@ class TarefaApplicationServiceTest {
 	@Mock
 	TarefaRepository tarefaRepository;
 
-    @Mock
-    UsuarioRepository usuarioRepository;
+	@Mock
+	UsuarioRepository usuarioRepository;
 
 	@Test
 	void deveRetornarIdTarefaNovaCriada() {
@@ -59,6 +60,39 @@ class TarefaApplicationServiceTest {
 		assertEquals(TarefaIdResponse.class, response.getClass());
 		assertEquals(UUID.class, response.getIdTarefa().getClass());
 
+	}
+
+	@Test
+	void mudaOrdemDaTarefaTest() {
+
+		Tarefa tarefa = DataHelper.createTarefa();
+		List<Tarefa> tarefas = DataHelper.createListTarefa();
+		Usuario usuario = DataHelper.createUsuario();
+		NovaPosicaoDaTarefaRequest novaPosicao = new NovaPosicaoDaTarefaRequest(1);
+
+		when(tarefaRepository.buscaTarefaPorId(any())).thenReturn(Optional.of(tarefa));
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+		when(tarefaRepository.buscarTodasTarefasPorIdUsuario(tarefa.getIdUsuario())).thenReturn(tarefas);
+
+		tarefaApplicationService.mudaOrdemDaTarefa(usuario.getEmail(), tarefa.getIdTarefa(), novaPosicao);
+
+		verify(tarefaRepository, times(1)).defineNovaPosicaoDaTarefa(tarefa, tarefas, novaPosicao);
+	}
+
+	@Test
+	void NãoMudaOrdemDAtarefaTest() {
+
+		Usuario usuario = DataHelper.createUsuario();
+		Tarefa tarefaNãoExiste = DataHelper.createTarefa();
+		NovaPosicaoDaTarefaRequest novaPosicao = new NovaPosicaoDaTarefaRequest(1);
+
+		when(tarefaRepository.buscaTarefaPorId(any())).thenReturn(Optional.empty());
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+
+		assertThrows(APIException.class, () -> tarefaApplicationService.mudaOrdemDaTarefa(usuario.getEmail(),
+				tarefaNãoExiste.getIdTarefa(), novaPosicao));
+
+		verify(tarefaRepository, never()).defineNovaPosicaoDaTarefa(any(), any(), any());
 	}
 
 	@Test
@@ -291,7 +325,6 @@ class TarefaApplicationServiceTest {
 	@Test
 	void naoDeveBuscarTodasTarefasPorUsuario() {
 		Usuario usuario = DataHelper.createUsuario();
-
 		when(usuarioRepository.buscaUsuarioPorEmail(any()))
 				.thenThrow(APIException.build(HttpStatus.BAD_REQUEST, "Usuario não encontrado!"));
 
@@ -354,23 +387,22 @@ class TarefaApplicationServiceTest {
 
 	}
 
-    @Test
-    void deveConcluirTarefa(){
-        Usuario usuario = DataHelper.createUsuario();
-        Tarefa tarefa = DataHelper.createTarefa();
-        when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
-        when(tarefaRepository.buscaTarefaPorId(any())).thenReturn(Optional.of(tarefa));
-        tarefaApplicationService.concluiTarefa(usuario.getEmail(), tarefa.getIdTarefa());
-        assertEquals(tarefa.getStatus(), StatusTarefa.CONCLUIDA);
-    }
+	@Test
+	void deveConcluirTarefa() {
+		Usuario usuario = DataHelper.createUsuario();
+		Tarefa tarefa = DataHelper.createTarefa();
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+		when(tarefaRepository.buscaTarefaPorId(any())).thenReturn(Optional.of(tarefa));
+		tarefaApplicationService.concluiTarefa(usuario.getEmail(), tarefa.getIdTarefa());
+		assertEquals(tarefa.getStatus(), StatusTarefa.CONCLUIDA);
+	}
 
-    @Test
-    void naoDeveConcluirTarefa(){
-        Tarefa tarefa = DataHelper.createTarefa();
-        when(usuarioRepository.buscaUsuarioPorEmail(any())).thenThrow(APIException.class);
-        assertThrows(APIException.class, () -> tarefaApplicationService.concluiTarefa("emailInvalido@gmail.com", tarefa.getIdTarefa()));
+	@Test
+	void naoDeveConcluirTarefa() {
+		Tarefa tarefa = DataHelper.createTarefa();
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenThrow(APIException.class);
+		assertThrows(APIException.class,
+				() -> tarefaApplicationService.concluiTarefa("emailInvalido@gmail.com", tarefa.getIdTarefa()));
 
-    }
-
-
+	}
 }
