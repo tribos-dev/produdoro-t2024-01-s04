@@ -60,6 +60,10 @@ public class Tarefa {
 		}
 	}
 
+	public void concluiTarefa() {
+		this.status = StatusTarefa.CONCLUIDA;
+	}
+
 	public void definirComoInativa() {
 		if (this.statusAtivacao.equals(StatusAtivacaoTarefa.ATIVA)) {
 			statusAtivacao = StatusAtivacaoTarefa.INATIVA;

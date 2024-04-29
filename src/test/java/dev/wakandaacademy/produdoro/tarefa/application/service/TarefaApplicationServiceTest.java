@@ -30,6 +30,7 @@ import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaListResponse;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaRepository;
 import dev.wakandaacademy.produdoro.tarefa.domain.StatusAtivacaoTarefa;
+import dev.wakandaacademy.produdoro.tarefa.domain.StatusTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
 import dev.wakandaacademy.produdoro.usuario.application.repository.UsuarioRepository;
 import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
@@ -45,8 +46,8 @@ class TarefaApplicationServiceTest {
 	@Mock
 	TarefaRepository tarefaRepository;
 
-	@Mock
-	UsuarioRepository usuarioRepository;
+    @Mock
+    UsuarioRepository usuarioRepository;
 
 	@Test
 	void deveRetornarIdTarefaNovaCriada() {
@@ -352,5 +353,24 @@ class TarefaApplicationServiceTest {
 		verify(tarefaRepository, times(1)).buscaTarefaPorId(idTarefaInvalido);
 
 	}
+
+    @Test
+    void deveConcluirTarefa(){
+        Usuario usuario = DataHelper.createUsuario();
+        Tarefa tarefa = DataHelper.createTarefa();
+        when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+        when(tarefaRepository.buscaTarefaPorId(any())).thenReturn(Optional.of(tarefa));
+        tarefaApplicationService.concluiTarefa(usuario.getEmail(), tarefa.getIdTarefa());
+        assertEquals(tarefa.getStatus(), StatusTarefa.CONCLUIDA);
+    }
+
+    @Test
+    void naoDeveConcluirTarefa(){
+        Tarefa tarefa = DataHelper.createTarefa();
+        when(usuarioRepository.buscaUsuarioPorEmail(any())).thenThrow(APIException.class);
+        assertThrows(APIException.class, () -> tarefaApplicationService.concluiTarefa("emailInvalido@gmail.com", tarefa.getIdTarefa()));
+
+    }
+
 
 }
