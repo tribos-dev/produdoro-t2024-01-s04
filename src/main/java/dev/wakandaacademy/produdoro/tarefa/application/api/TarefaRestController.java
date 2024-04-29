@@ -1,5 +1,6 @@
 package dev.wakandaacademy.produdoro.tarefa.application.api;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ public class TarefaRestController implements TarefaAPI {
 	private final TarefaService tarefaService;
 	private final TokenService tokenService;
 
+	@Override
 	public TarefaIdResponse postNovaTarefa(TarefaRequest tarefaRequest) {
 		log.info("[inicia]  TarefaRestController - postNovaTarefa  ");
 		TarefaIdResponse tarefaCriada = tarefaService.criaNovaTarefa(tarefaRequest);
@@ -30,7 +32,7 @@ public class TarefaRestController implements TarefaAPI {
 	public TarefaDetalhadoResponse detalhaTarefa(String token, UUID idTarefa) {
 		log.info("[inicia] TarefaRestController - detalhaTarefa");
 		String usuario = getUsuarioByToken(token);
-		Tarefa tarefa = tarefaService.detalhaTarefa(usuario,idTarefa);
+		Tarefa tarefa = tarefaService.detalhaTarefa(usuario, idTarefa);
 		log.info("[finaliza] TarefaRestController - detalhaTarefa");
 		return new TarefaDetalhadoResponse(tarefa);
 	}
@@ -41,14 +43,63 @@ public class TarefaRestController implements TarefaAPI {
 		String usuario = getUsuarioByToken(token);
 		tarefaService.concluiTarefa(usuario, idTarefa);
 		log.info("[finaliza] TarefaRestController - concluiTarefa");
+	}
 
+	@Override
+	public void editaTarefa(String token, UUID idTarefa, EditaTarefaRequest tarefaRequest) {
+		log.info("[inicia] TarefaRestController - editaTarefa");
+		String emailUsuario = getUsuarioByToken(token);
+		tarefaService.editaTarefa(emailUsuario, idTarefa, tarefaRequest);
+		log.info("[finaliza] TarefaRestController - editaTarefa");
+	}
+
+	@Override
+	public void definiTarefaComoAtiva(String token, UUID idTarefa) {
+		log.info("[inicia] TarefaRestController - definiTarefaComoAtiva");
+		String usuario = getUsuarioByToken(token);
+		tarefaService.definiTarefaComoAtiva(usuario, idTarefa);
+		log.info("[finaliza] TarefaRestController - definiTarefaComoAtiva");
+	}
+
+	@Override
+	public void deletaTarefa(UUID idTarefa, String token) {
+		log.info("[inicia] TarefaRestController - deletaTarefa");
+		log.info("[idTarefa] {}", idTarefa);
+		String usuario = getUsuarioByToken(token);
+		tarefaService.deletaTarefa(idTarefa, usuario);
+		log.info("[finaliza] TarefaRestController - deletaTarefa");
+	}
+
+	@Override
+	public void deletaTodasAsTarefasDoUsuario(String token, UUID idUsuario) {
+		log.info("[inicia] TarefaRestController - deletaTodasAsTarefasDoUsuario");
+		String usuario = getUsuarioByToken(token);
+		tarefaService.deletaTodasAsTarefasDoUsuario(usuario, idUsuario);
+		log.info("[finaliza] TarefaRestController - deletaTodasAsTarefasDoUsuario");
+	}
+
+	@Override
+	public void deletaTarefasConcluidas(String token, UUID idUsuario) {
+		log.info("[inicia] TarefaRestController - deletaTarefasConcluidas");
+		String email = getUsuarioByToken(token);
+		tarefaService.deletaTarefasConcluidas(email, idUsuario);
+		log.info("[finaliza] TarefaRestController - deletaTarefasConcluidas");
+	}
+
+	@Override
+	public List<TarefaListResponse> listarTodasTarefas(String token, UUID idUsuario) {
+		log.info("[inicia] TarefaRestController - listarTodasTarefas");
+		String usuario = getUsuarioByToken(token);
+		List<TarefaListResponse> tarefas = tarefaService.buscarTodasTarefas(usuario, idUsuario);
+		log.info("[finaliza] TarefaRestController - listarTodasTarefas");
+		return tarefas;
 	}
 
 	private String getUsuarioByToken(String token) {
 		log.debug("[token] {}", token);
-		String usuario = tokenService.getUsuarioByBearerToken(token).orElseThrow(() -> APIException.build(HttpStatus.UNAUTHORIZED, token));
+		String usuario = tokenService.getUsuarioByBearerToken(token)
+				.orElseThrow(() -> APIException.build(HttpStatus.UNAUTHORIZED, token));
 		log.info("[usuario] {}", usuario);
 		return usuario;
 	}
-
 }
