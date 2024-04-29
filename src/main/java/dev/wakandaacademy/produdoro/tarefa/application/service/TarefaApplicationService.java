@@ -90,6 +90,14 @@ public class TarefaApplicationService implements TarefaService {
 	}
 
 	@Override
+	public void deletaTarefa(UUID idTarefa, String usuario) {
+		log.info("[inicia] TarefaApplicationService - deletaTarefa");
+		Tarefa tarefa = detalhaTarefa(usuario, idTarefa);
+		tarefaRepository.deleta(tarefa);
+		log.info("[finaliza] TarefaApplicationService - deletaTarefa");
+	}
+
+	@Override
 	public void editaTarefa(String emailUsuario, UUID idTarefa, EditaTarefaRequest tarefaRequest) {
 		log.info("[inicia] TarefaApplicationService - editaTarefa");
 		Tarefa tarefa = detalhaTarefa(emailUsuario, idTarefa);
