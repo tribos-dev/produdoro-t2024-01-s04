@@ -29,15 +29,19 @@ public interface TarefaAPI {
 	TarefaDetalhadoResponse detalhaTarefa(@RequestHeader(name = "Authorization", required = true) String token,
 			@PathVariable UUID idTarefa);
 
-	@PostMapping("/muda-ordem/{idTarefa}")
-	@ResponseStatus(code = HttpStatus.ACCEPTED)
-	void mudaOrdemdaTarefa(@RequestHeader(name = "Authorization") String token, @PathVariable UUID idTarefa,
-			@RequestBody @Valid NovaPosicaoDaTarefaRequest novaPosicaoDaTarefaRequest);
+	@PatchMapping("/{idTarefa}/incrementa-pomodoro")
+	@ResponseStatus(code = HttpStatus.NO_CONTENT)
+	void incrementaPomodoro(@RequestHeader(name = "Authorization") String token, @PathVariable UUID idTarefa);
 
 	@GetMapping("/listar-tarefa/{idUsuario}")
 	@ResponseStatus(code = HttpStatus.OK)
 	List<TarefaListResponse> listarTodasTarefas(@RequestHeader(name = "Authorization", required = true) String token,
 			@PathVariable UUID idUsuario);
+
+	@PostMapping("/muda-ordem/{idTarefa}")
+	@ResponseStatus(code = HttpStatus.ACCEPTED)
+	void mudaOrdemdaTarefa(@RequestHeader(name = "Authorization") String token, @PathVariable UUID idTarefa,
+			@RequestBody @Valid NovaPosicaoDaTarefaRequest novaPosicaoDaTarefaRequest);
 
 	@PatchMapping("/concluiTarefa/{idTarefa}")
 	@ResponseStatus(code = HttpStatus.NO_CONTENT)

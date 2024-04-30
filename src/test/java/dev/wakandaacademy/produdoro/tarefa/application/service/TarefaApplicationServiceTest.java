@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,7 +60,39 @@ class TarefaApplicationServiceTest {
 		assertNotNull(response);
 		assertEquals(TarefaIdResponse.class, response.getClass());
 		assertEquals(UUID.class, response.getIdTarefa().getClass());
+	}
 
+	@Test
+	void deveIcrementarPomodoroAUmaTarefa() {
+
+		Usuario usuario = DataHelper.createUsuario();
+		Tarefa tarefa = DataHelper.createTarefa();
+
+		when(usuarioRepository.buscaUsuarioPorEmail(anyString())).thenReturn(usuario);
+		when(tarefaRepository.buscaTarefaPorId(any(UUID.class))).thenReturn(Optional.of(tarefa));
+
+		tarefaApplicationService.incrementaPomodoro(usuario.getEmail(), tarefa.getIdTarefa());
+
+		verify(tarefaRepository, times(1)).salva(any(Tarefa.class));
+	}
+
+	void deveListarTodasAsTarefas() {
+		// Dado
+		Usuario usuario = DataHelper.createUsuario();
+		List<Tarefa> tarefas = DataHelper.createListTarefa();
+		// Quando
+		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
+		when(usuarioRepository.buscaUsuarioPorId(any())).thenReturn(usuario);
+		when(tarefaRepository.buscarTodasTarefasPorIdUsuario(any())).thenReturn(tarefas);
+
+		List<TarefaListResponse> resultado = tarefaApplicationService.buscarTodasTarefas(usuario.getEmail(),
+				usuario.getIdUsuario());
+
+		// Então
+		verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(usuario.getEmail());
+		verify(usuarioRepository, times(1)).buscaUsuarioPorId(usuario.getIdUsuario());
+		verify(tarefaRepository, times(1)).buscarTodasTarefasPorIdUsuario(usuario.getIdUsuario());
+		assertEquals(resultado.size(), 8);
 	}
 
 	@Test
@@ -134,25 +167,6 @@ class TarefaApplicationServiceTest {
 		return Tarefa.builder().contagemPomodoro(1).idTarefa(UUID.fromString("4c70c27a-446c-4506-b666-1067085d8d85"))
 				.idUsuario(usuario.getIdUsuario()).descricao("descricao tarefa")
 				.statusAtivacao(StatusAtivacaoTarefa.ATIVA).build();
-	}
-
-	void deveListarTodasAsTarefas() {
-		// Dado
-		Usuario usuario = DataHelper.createUsuario();
-		List<Tarefa> tarefas = DataHelper.createListTarefa();
-		// Quando
-		when(usuarioRepository.buscaUsuarioPorEmail(any())).thenReturn(usuario);
-		when(usuarioRepository.buscaUsuarioPorId(any())).thenReturn(usuario);
-		when(tarefaRepository.buscarTodasTarefasPorIdUsuario(any())).thenReturn(tarefas);
-
-		List<TarefaListResponse> resultado = tarefaApplicationService.buscarTodasTarefas(usuario.getEmail(),
-				usuario.getIdUsuario());
-
-		// Então
-		verify(usuarioRepository, times(1)).buscaUsuarioPorEmail(usuario.getEmail());
-		verify(usuarioRepository, times(1)).buscaUsuarioPorId(usuario.getIdUsuario());
-		verify(tarefaRepository, times(1)).buscarTodasTarefasPorIdUsuario(usuario.getIdUsuario());
-		assertEquals(resultado.size(), 8);
 	}
 
 	public TarefaRequest getTarefaRequest() {

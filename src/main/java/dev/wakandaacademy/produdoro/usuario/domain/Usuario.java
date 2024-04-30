@@ -1,6 +1,5 @@
 package dev.wakandaacademy.produdoro.usuario.domain;
 
-
 import java.util.UUID;
 
 import javax.validation.constraints.Email;
@@ -85,5 +84,7 @@ public class Usuario {
 		if (!this.idUsuario.equals(idUsuario)) {
 			throw APIException.build(HttpStatus.UNAUTHORIZED, "Credencial de autenticação não é válida.");
 		}
+
 	}
+
 }

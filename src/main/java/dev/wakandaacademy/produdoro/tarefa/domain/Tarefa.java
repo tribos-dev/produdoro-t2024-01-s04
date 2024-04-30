@@ -12,21 +12,21 @@ import org.springframework.http.HttpStatus;
 import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.tarefa.application.api.EditaTarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.application.api.TarefaRequest;
+import dev.wakandaacademy.produdoro.usuario.domain.StatusUsuario;
 import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 
-@Log4j2
 @Builder
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Document(collection = "Tarefa")
 public class Tarefa {
+
 	@Id
 	private UUID idTarefa;
 	@NotBlank
@@ -83,5 +83,11 @@ public class Tarefa {
 
 	public void atualizaPosicao(int novaPosicao) {
 		this.posicao = novaPosicao;
+	}
+
+	public void incrementaPomodoro(Usuario usuario) {
+		if (usuario.getStatus().equals(StatusUsuario.FOCO)) {
+			this.contagemPomodoro++;
+		}
 	}
 }

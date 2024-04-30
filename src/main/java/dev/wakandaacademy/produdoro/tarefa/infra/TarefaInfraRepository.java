@@ -20,6 +20,8 @@ import dev.wakandaacademy.produdoro.tarefa.application.repository.TarefaReposito
 import dev.wakandaacademy.produdoro.tarefa.domain.StatusAtivacaoTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.StatusTarefa;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
+import dev.wakandaacademy.produdoro.usuario.domain.StatusUsuario;
+import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -30,6 +32,7 @@ public class TarefaInfraRepository implements TarefaRepository {
 
 	private final TarefaSpringMongoDBRepository tarefaSpringMongoDBRepository;
 	private final MongoTemplate mongoTemplate;
+	private Integer contagemPomodoroPausaCurta = 0;
 
 	@Override
 	public Tarefa salva(Tarefa tarefa) {
@@ -176,4 +179,26 @@ public class TarefaInfraRepository implements TarefaRepository {
 		tarefaSpringMongoDBRepository.delete(tarefa);
 		log.info("[finaliza] TarefaInfraRepository - deleta");
 	}
+
+	@Override
+	public void processaStatusEContadorPomodoro(Usuario usuarioStatus) {
+		log.info("[inicia] TarefaInfraRepository - modificaStatusUsuarioIncrementa");
+		if (usuarioStatus.getStatus().equals(StatusUsuario.FOCO)) {
+			if (this.contagemPomodoroPausaCurta < 3) {
+				usuarioStatus.mudaStatusParaPausaCurta();
+			} else {
+				usuarioStatus.mudaStatusPausaLonga();
+				this.contagemPomodoroPausaCurta = 0;
+			}
+		} else {
+			usuarioStatus.alteraStatusParaFoco(usuarioStatus.getIdUsuario());
+			this.contagemPomodoroPausaCurta++;
+			;
+		}
+		Query query = Query.query(Criteria.where("idUsuario").is(usuarioStatus.getIdUsuario()));
+		Update updateUsuario = Update.update("status", usuarioStatus.getStatus());
+		mongoTemplate.updateMulti(query, updateUsuario, Usuario.class);
+		log.info("[finaliza] TarefaInfraRepository - modificaStatusUsuarioIncrementa");
+	}
+
 }
