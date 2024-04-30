@@ -1,15 +1,15 @@
 package dev.wakandaacademy.produdoro.usuario.infra;
 
-import dev.wakandaacademy.produdoro.handler.APIException;
-import lombok.extern.log4j.Log4j2;
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import dev.wakandaacademy.produdoro.handler.APIException;
 import dev.wakandaacademy.produdoro.usuario.application.repository.UsuarioRepository;
 import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
 import lombok.RequiredArgsConstructor;
-
-import java.util.UUID;
+import lombok.extern.log4j.Log4j2;
 
 @Repository
 @RequiredArgsConstructor
