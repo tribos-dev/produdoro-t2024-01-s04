@@ -86,14 +86,8 @@ public class Tarefa {
 	}
 
 	public void incrementaPomodoro(Usuario usuario) {
-		if (usuario.getStatus().equals(StatusUsuario.FOCO) && usuario.getQuantidadePomodorosPausaCurta() < 3) {
+		if (usuario.getStatus().equals(StatusUsuario.FOCO)) {
 			this.contagemPomodoro++;
-			usuario.mudaStatusParaPausaCurta();
-			usuario.incrementaQuantidadePomodorosPausaCurta();
-		} else {
-			usuario.mudaStatusPausaLonga();
-			usuario.reiniciaContadorPausaCurta();
 		}
 	}
-
 }

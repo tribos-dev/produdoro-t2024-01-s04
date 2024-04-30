@@ -87,13 +87,4 @@ public class Usuario {
 
 	}
 
-	public void incrementaQuantidadePomodorosPausaCurta() {
-		this.quantidadePomodorosPausaCurta++;
-	}
-
-	public void reiniciaContadorPausaCurta() {
-		this.quantidadePomodorosPausaCurta = 0;
-
-	}
-
 }

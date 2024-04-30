@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import dev.wakandaacademy.produdoro.tarefa.application.api.NovaPosicaoDaTarefaRequest;
 import dev.wakandaacademy.produdoro.tarefa.domain.Tarefa;
+import dev.wakandaacademy.produdoro.usuario.domain.Usuario;
 
 public interface TarefaRepository {
 
@@ -35,4 +36,6 @@ public interface TarefaRepository {
 	void atualizaPosicaoDasTarefas(List<Tarefa> tarefasDoUsuario);
 
 	void deleta(Tarefa tarefa);
+
+	void processaStatusEContadorPomodoro(Usuario usuario);
 }
