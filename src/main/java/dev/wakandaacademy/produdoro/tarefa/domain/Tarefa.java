@@ -63,7 +63,7 @@ public class Tarefa {
             this.contagemPomodoro++;
 //            usuario.mudaStatusParaPausaCurta();
         } else {
-//            usuario.mudaStatusPausaLonga();
+            usuario.mudaStatusPausaLonga();
             this.contagemPomodoro = 0;
         }
     }
